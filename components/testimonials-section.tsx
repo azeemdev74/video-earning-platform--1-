@@ -1,86 +1,242 @@
-"use client";
-import { Card, CardContent } from "@/components/ui/card";
-import { Quote } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function TestimonialsSection() {
-  const testimonials = [
+interface Testimonial {
+  id: number;
+  text: string;
+  author: string;
+  country: string;
+  role: string;
+  image: string;
+}
+
+export default function TestimonialSlider() {
+  const testimonials: Testimonial[] = [
     {
-      quote:
-        "I've earned over $200 in my first month just by watching videos during my commute. This platform is amazing!",
-      name: "Sarah Johnson",
-      location: "New York, USA",
-      amount: "$200+",
+      id: 1,
+      text: "Great network with high payouts! I have never missed a payment. The platform is incredibly reliable and the support team is always helpful.",
+      author: "Adam Walls",
+      country: "USA",
+      role: "Freelance Designer",
+      image: "/images/testimonial-1.jpg",
     },
     {
-      quote:
-        "Rewards Hub Dollor has become my go-to platform for earning extra cash. The videos are interesting and the payments are always on time.",
-      name: "Michael Chen",
-      location: "Toronto, Canada",
-      amount: "$150+",
+      id: 2,
+      text: "Good app, many offers and tasks, also have a good UI. It's become my primary source of extra income with minimal effort required.",
+      author: "Vickie Linneman",
+      country: "United Kingdom",
+      role: "Marketing Consultant",
+      image: "/images/testimonial-2.jpg",
     },
     {
-      quote:
-        "As a student, this has been a great way to make some extra money between classes. Highly recommend!",
-      name: "Emma Rodriguez",
-      location: "London, UK",
-      amount: "$120+",
-    },
-    {
-      quote:
-        "I was skeptical at first, but after receiving my first payment, I was convinced. This is legit!",
-      name: "David Kim",
-      location: "Sydney, Australia",
-      amount: "$180+",
-    },
-    {
-      quote:
-        "The platform is so easy to use, and I love that I can watch videos on any topic that interests me while earning money.",
-      name: "Priya Patel",
-      location: "Mumbai, India",
-      amount: "$90+",
-    },
-    {
-      quote:
-        "Rewards Hub Dollor has helped me pay for my monthly subscriptions. It's like getting paid to be entertained!",
-      name: "Thomas Weber",
-      location: "Berlin, Germany",
-      amount: "$130+",
+      id: 3,
+      text: "Excellent service with quick support response times. I've tried many similar platforms but this one stands out for its transparency.",
+      author: "Michael Chen",
+      country: "Canada",
+      role: "Software Developer",
+      image: "/images/testimonial-3.jpg",
     },
   ];
 
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(true);
+  const [direction, setDirection] = useState<"left" | "right">("right");
+
+  const nextSlide = (): void => {
+    setDirection("right");
+    setCurrentIndex((prevIndex) =>
+      prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const prevSlide = (): void => {
+    setDirection("left");
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? testimonials.length - 1 : prevIndex - 1
+    );
+  };
+
+  const goToSlide = (index: number): void => {
+    setDirection(index > currentIndex ? "right" : "left");
+    setCurrentIndex(index);
+  };
+
+  // Auto-play functionality
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (isAutoPlaying) {
+      intervalId = setInterval(() => {
+        nextSlide();
+      }, 7000); // Change slide every 7 seconds
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [currentIndex, isAutoPlaying]);
+
+  // Pause autoplay when user interacts
+  const pauseAutoPlay = (): void => {
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 15000); // Resume after 15 seconds
+  };
+
+  // Animation variants
+  const cardVariants = {
+    enter: (direction: string) => ({
+      x: direction === "right" ? 1000 : -1000,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        x: { type: "spring", stiffness: 300, damping: 30 },
+        opacity: { duration: 0.2 },
+      },
+    },
+    exit: (direction: string) => ({
+      x: direction === "right" ? -1000 : 1000,
+      opacity: 0,
+      transition: {
+        duration: 0.3,
+      },
+    }),
+  };
+
   return (
-    <div className="py-12">
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {testimonials.map((testimonial, index) => (
-          <Card key={index} className="overflow-hidden">
-            <CardContent className="p-6">
-              <div className="flex flex-col space-y-4">
-                <div className="flex-1 space-y-2">
-                  <Quote className="h-5 w-5 text-primary" />
-                  <p className="text-sm text-muted-foreground">
-                    {testimonial.quote}
-                  </p>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="rounded-full bg-muted h-10 w-10 flex items-center justify-center">
-                    {testimonial.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{testimonial.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {testimonial.location}
+    <div className="bg-white dark:bg-gray-900 py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <motion.h2
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
+          >
+            What our users said
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="text-lg md:text-xl text-gray-600 dark:text-gray-300"
+          >
+            They are doing great things with us
+          </motion.p>
+        </div>
+
+        <div
+          className="relative"
+          onMouseEnter={() => setIsAutoPlaying(false)}
+          onMouseLeave={() => setIsAutoPlaying(true)}
+        >
+          <AnimatePresence custom={direction} mode="wait">
+            <motion.div
+              key={currentIndex}
+              custom={direction}
+              variants={cardVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="w-full"
+            >
+              <div className="flex flex-col lg:flex-row gap-8">
+                {/* Left side - Feedback text */}
+                <div className="lg:w-1/2 bg-gray-50 dark:bg-gray-800 p-8 md:p-10 rounded-xl shadow-lg">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
+                      {testimonials[currentIndex].text}
                     </p>
-                  </div>
-                  <div className="ml-auto">
-                    <div className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                      {testimonial.amount}
+                    <div>
+                      <p className="font-semibold text-xl text-gray-900 dark:text-white">
+                        {testimonials[currentIndex].author}
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        {testimonials[currentIndex].role}
+                      </p>
+                      <p className="text-gray-500 dark:text-gray-500 text-sm mt-1">
+                        {testimonials[currentIndex].country}
+                      </p>
                     </div>
-                  </div>
+                  </motion.div>
+                </div>
+
+                {/* Right side - Client picture */}
+                <div className="lg:w-1/2 flex items-center justify-center">
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.6, type: "spring" }}
+                    className="relative w-full h-64 md:h-96 rounded-xl overflow-hidden shadow-xl"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20" />
+                    <img
+                      src={testimonials[currentIndex].image}
+                      alt={testimonials[currentIndex].author}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+                      <p className="text-white text-lg font-medium">
+                        {testimonials[currentIndex].author}
+                      </p>
+                      <p className="text-gray-300 text-sm">
+                        {testimonials[currentIndex].role}
+                      </p>
+                    </div>
+                  </motion.div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Navigation Arrows */}
+          <button
+            onClick={() => {
+              prevSlide();
+              pauseAutoPlay();
+            }}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 md:-ml-6 bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all z-10 hover:scale-110"
+            aria-label="Previous testimonial"
+          >
+            <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+          </button>
+          <button
+            onClick={() => {
+              nextSlide();
+              pauseAutoPlay();
+            }}
+            className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 md:-mr-6 bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all z-10 hover:scale-110"
+            aria-label="Next testimonial"
+          >
+            <ChevronRight className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+          </button>
+
+          {/* Dots Indicator */}
+          <div className="flex justify-center mt-8 space-x-2">
+            {testimonials.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  goToSlide(index);
+                  pauseAutoPlay();
+                }}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index === currentIndex
+                    ? "bg-primary w-6 dark:bg-primary-400"
+                    : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
+                }`}
+                aria-label={`Go to testimonial ${index + 1}`}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
