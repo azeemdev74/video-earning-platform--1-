@@ -18,11 +18,20 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useSplash } from "@/components/splash-provider";
 import { Menu, X } from "lucide-react";
 import { motion } from "framer-motion";
-import "/page.css";
+import "./page.css";
 
 export default function Home() {
   const { setIsLoading } = useSplash();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [hoveredNav, setHoveredNav] = useState(null);
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Simulate initial loading
   useEffect(() => {
@@ -81,42 +90,59 @@ export default function Home() {
           <ThemeToggle />
         </div>
       </header> */}
-      <header className="sticky top-0 z-50 w-full bg-white dark:bg-black border-b dark:border-gray-800 shadow-sm transition-all duration-300">
-        <div className="px-4 lg:px-6 h-16 flex items-center justify-between">
+      <header
+        className={`sticky top-0 z-50 w-full bg-white dark:bg-black border-b dark:border-gray-800 shadow-sm transition-all duration-300 ${
+          scrolled ? "h-16" : "h-20"
+        }`}
+      >
+        <div className="container mx-auto px-4 h-full flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <Play className="h-6 w-6 text-primary " />
-            <span className="ml-2 text-2xl font-bold ">Rewards Hub Dollar</span>
+          <Link href="/" className="flex items-center group">
+            <Play
+              className={`text-primary transition-all duration-300 ${
+                scrolled ? "h-5 w-5" : "h-6 w-6"
+              } group-hover:scale-110`}
+            />
+            <span
+              className={`ml-2 font-bold transition-all duration-300 ${
+                scrolled ? "text-lg" : "text-xl"
+              } group-hover:text-primary`}
+            >
+              Rewards Hub Dollar
+            </span>
           </Link>
 
-          {/* Navigation (Desktop) */}
-          <nav className="hidden lg:flex flex-1 justify-center gap-14">
+          {/* Desktop Navigation with Larger Text and Zoom Effect */}
+          <nav className="hidden lg:flex flex-1 justify-center gap-10">
             {["Features", "About", "Testimonials", "Partners"].map((text) => (
               <Link
                 key={text}
                 href={`/${text.toLowerCase()}`}
-                className="text-lg font-semibold -300 hover:text-primary transform transition-all duration-200 hover:scale-110"
+                className="relative px-2 py-1 group transition-all duration-300"
               >
-                {text}
+                <span className="block text-lg font-semibold group-hover:scale-110 group-hover:text-primary transition-transform duration-300 origin-center">
+                  {text}
+                </span>
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
               </Link>
             ))}
           </nav>
 
-          {/* Buttons & Theme (Desktop) */}
-          <div className="hidden lg:flex items-center gap-7 lg:pr-8">
+          {/* Buttons */}
+          <div className="hidden lg:flex items-center gap-4">
             <Link href="/login">
               <Button
                 variant="outline"
-                size="sm"
-                className="transition-all duration-200 hover:bg-gray-100 dark:hover:bg-black hover:scale-105"
+                size={scrolled ? "sm" : "default"}
+                className="hover:scale-105 transition-transform duration-300 text-base"
               >
                 Login
               </Button>
             </Link>
             <Link href="/register">
               <Button
-                size="sm"
-                className="transition-all duration-200 hover:scale-105 hover:shadow-md"
+                size={scrolled ? "sm" : "default"}
+                className="hover:scale-105 hover:shadow-lg transition-all duration-300 text-base"
               >
                 Register
               </Button>
@@ -124,10 +150,11 @@ export default function Home() {
             <ThemeToggle />
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="lg:hidden text-gray-700 dark:text-white"
+            className="lg:hidden text-gray-700 dark:text-white hover:scale-110 transition-transform duration-300"
+            aria-label="Toggle menu"
           >
             {menuOpen ? (
               <X className="w-6 h-6" />
@@ -136,8 +163,52 @@ export default function Home() {
             )}
           </button>
         </div>
-      </header>
 
+        {/* Mobile Menu with Larger Text */}
+        <div
+          className={`lg:hidden bg-white dark:bg-black overflow-hidden transition-all duration-300 ease-in-out ${
+            menuOpen ? "max-h-96 border-t dark:border-gray-800" : "max-h-0"
+          }`}
+        >
+          <div className="px-4 py-3 flex flex-col space-y-4">
+            {["Features", "About", "Testimonials", "Partners"].map((text) => (
+              <Link
+                key={text}
+                href={`/${text.toLowerCase()}`}
+                className="py-3 px-3 text-lg font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105 transition-all duration-200 origin-left"
+                onClick={() => setMenuOpen(false)}
+              >
+                {text}
+              </Link>
+            ))}
+            <div className="pt-3 flex gap-4">
+              <Link
+                href="/login"
+                className="flex-1"
+                onClick={() => setMenuOpen(false)}
+              >
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full hover:scale-105 text-base"
+                >
+                  Login
+                </Button>
+              </Link>
+              <Link
+                href="/register"
+                className="flex-1"
+                onClick={() => setMenuOpen(false)}
+              >
+                <Button size="lg" className="w-full hover:scale-105 text-base">
+                  Register
+                </Button>
+              </Link>
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      </header>
       <main className="flex-1">
         {/* Section 1 */}
         <section className="w-full mt-12 md:mt-12 lg:mt-28">
@@ -203,30 +274,47 @@ export default function Home() {
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="flex flex-wrap justify-center gap-8"
+              viewport={{ amount: 0.5 }}
+              className="flex flex-row justify-center gap-10 overflow-x-auto px-2"
             >
               {/* Card 1 */}
-              <div className="rounded-3xl overflow-hidden shadow-lg">
-                <div className="bg-blue-500 text-white px-8 py-12 text-center">
-                  <div className="text-4xl font-bold">+100K</div>
-                  <div className="text-base">Registered Users</div>
+              <div
+                id="card-1"
+                className=" w-[140px] sm:w-[160px] md:w-[220px] h-[250px] sm:h-[300px] md:h-[320px] lg:h-[430px] rounded-3xl overflow-hidden shadow-lg flex-shrink-0"
+              >
+                <div className="bg-blue-500 text-white px-3 py-6 sm:px-4 sm:py-8 md:px-6 md:py-10 text-center h-1/2 flex flex-col justify-center gap-3">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-bold">
+                    +100K
+                  </div>
+                  <div className="text-xs sm:text-sm md:text-base">
+                    Registered Users
+                  </div>
                 </div>
-                <div className="bg-green-500 text-white px-8 py-12 text-center">
-                  <div className="text-4xl font-bold">+10K</div>
-                  <div className="text-base">Videos</div>
+                <div className="bg-green-500 text-white px-3 py-6 sm:px-4 sm:py-8 md:px-6 md:py-10 text-center h-1/2 flex flex-col justify-center gap-2">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-bold">
+                    +10K
+                  </div>
+                  <div className="text-xs sm:text-sm md:text-base">Videos</div>
                 </div>
               </div>
 
               {/* Card 2 */}
-              <div className="rounded-3xl overflow-hidden shadow-lg">
-                <div className="bg-green-500 text-white px-8 py-12 text-center">
-                  <div className="text-4xl font-bold">$15M</div>
-                  <div className="text-base">Total Cash Paid</div>
+              <div className="w-[140px] sm:w-[160px] md:w-[220px] h-[250px] sm:h-[300px] md:h-[320px] lg:h-[430px] rounded-3xl overflow-hidden shadow-lg flex-shrink-0">
+                <div className="bg-green-500 text-white px-3 py-6 sm:px-4 sm:py-8 md:px-6 md:py-10 text-center h-1/2 flex flex-col justify-center gap-3">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-bold">
+                    $15M
+                  </div>
+                  <div className="text-xs sm:text-sm md:text-base">
+                    Total Cash Paid
+                  </div>
                 </div>
-                <div className="bg-orange-400 text-white px-8 py-12 text-center">
-                  <div className="text-4xl font-bold">+100M</div>
-                  <div className="text-base">Video Views</div>
+                <div className="bg-orange-400 text-white px-3 py-6 sm:px-4 sm:py-8 md:px-6 md:py-10 text-center h-1/2 flex flex-col justify-center gap-3">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-bold">
+                    +100M
+                  </div>
+                  <div className="text-xs sm:text-sm md:text-base">
+                    Video Views
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -265,7 +353,13 @@ export default function Home() {
         <section className="px-4 py-16 my-24">
           <div className="max-w-7xl mx-auto flex flex-col-reverse lg:flex-row items-center justify-between gap-10">
             {/* Left Content */}
-            <div className="text-center lg:text-left w-full lg:w-1/2">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ amount: 0.5 }}
+              className="text-center lg:text-left w-full lg:w-1/2"
+            >
               <h2 className="text-3xl md:text-4xl font-bold  mb-4">
                 Daily Payouts
               </h2>
@@ -273,32 +367,50 @@ export default function Home() {
                 We release cashouts of our members daily via Paypal, Cash App,
                 Venmo etc.
               </p>
-            </div>
+            </motion.div>
 
             {/* Right Image */}
-            <div className="w-full lg:w-1/2 flex justify-center">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ amount: 0.5 }}
+              className="w-full lg:w-1/2 flex justify-center"
+            >
               <img
                 src="/img/payout-img.png"
                 alt="Daily Payouts"
                 className="w-full max-w-md md:max-w-lg lg:max-w-xl object-contain"
               />
-            </div>
+            </motion.div>
           </div>
         </section>
         {/* Section 4 higher rate */}
         <section className=" px-4 py-16 my-24">
           <div className="max-w-7xl mx-auto flex flex-col-reverse lg:flex-row items-center justify-between gap-10">
             {/* Left Content */}
-            <div className="w-full lg:w-1/2 flex justify-center">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ amount: 0.5 }}
+              className="w-full lg:w-1/2 flex justify-center"
+            >
               <img
                 src="/img/higher-rate-img.png"
                 alt="Daily Payouts"
                 className="w-full max-w-md md:max-w-lg lg:max-w-xl object-contain"
               />
-            </div>
+            </motion.div>
 
             {/* Right Image */}
-            <div className="text-center lg:text-left w-full lg:w-1/2">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ amount: 0.5 }}
+              className="text-center lg:text-left w-full lg:w-1/2"
+            >
               <h2 className="text-3xl md:text-4xl font-bold  mb-4">
                 Higher Rates
               </h2>
@@ -306,27 +418,41 @@ export default function Home() {
                 DollarTub always pay their members the HIGHEST on all offers &
                 surveys as compared to others.
               </p>
-            </div>
+            </motion.div>
           </div>
         </section>
         {/* Section 5 Global Offers */}
         <section className=" px-4 py-16">
           <div className="max-w-6xl mx-auto text-center flex flex-col items-center">
-            {/* Heading */}
-            <h2 className="text-3xl md:text-4xl font-bold  mb-4">
-              Global Offers
-            </h2>
-            {/* Subheading */}
-            <p className="text-lg md:text-xl  mb-10 max-w-3xl">
-              We have huge inventory of surveys & offers in our system for all
-              our members across the globe.
-            </p>
-            {/* Illustration */}
-            <img
-              src="/img/global-offers-img.png"
-              alt="Global Offers"
-              className="w-full max-w-4xl object-contain"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ amount: 0.5 }}
+            >
+              {/* Heading */}
+              <h2 className="text-3xl md:text-4xl font-bold  mb-4">
+                Global Offers
+              </h2>
+              {/* Subheading */}
+              <p className="text-lg md:text-xl  mb-10 max-w-3xl">
+                We have huge inventory of surveys & offers in our system for all
+                our members across the globe.
+              </p>
+              {/* Illustration */}
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ amount: 0.5 }}
+            >
+              <img
+                src="/img/global-offers-img.png"
+                alt="Global Offers"
+                className="w-full max-w-4xl object-contain"
+              />
+            </motion.div>
           </div>
         </section>
         <TestimonialsSection />
