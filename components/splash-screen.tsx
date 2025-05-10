@@ -1,4 +1,5 @@
-import { Play } from "lucide-react"
+"use client";
+import { Play } from "lucide-react";
 
 export default function SplashScreen() {
   return (
@@ -14,5 +15,5 @@ export default function SplashScreen() {
         <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
       </div>
     </div>
-  )
+  );
 }
