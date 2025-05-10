@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -16,9 +16,11 @@ import PartnersSection from "@/components/partners-section";
 import Footer from "@/components/footer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useSplash } from "@/components/splash-provider";
+import { Menu, X } from "lucide-react";
 
 export default function Home() {
   const { setIsLoading } = useSplash();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Simulate initial loading
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="px-4 lg:px-6 h-16 flex items-center border-b">
+      {/* <header className="px-4 lg:px-6 h-16 flex items-center border-b">
         <Link href="/" className="flex items-center justify-center">
           <Play className="h-6 w-6 text-primary" />
           <span className="ml-2 text-xl font-bold">Rewards Hub Dollor</span>
@@ -76,6 +78,98 @@ export default function Home() {
         <div className="ml-2">
           <ThemeToggle />
         </div>
+      </header> */}
+      <header className="sticky top-0 z-50 w-full bg-white border-b shadow-sm transition-all duration-300">
+        <div className="px-4 lg:px-6 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center">
+            <Play className="h-6 w-6 text-primary" />
+            <span className="ml-2 text-2xl font-bold text-gray-800">
+              Rewards Hub Dollar
+            </span>
+          </Link>
+
+          {/* Navigation (Desktop) */}
+          <nav className="hidden lg:flex flex-1 justify-center gap-10">
+            {["Features", "About", "Testimonials", "Partners"].map((text) => (
+              <Link
+                key={text}
+                href={`/${text.toLowerCase()}`}
+                className="text-lg font-semibold text-gray-700 hover:text-primary transform transition-all duration-200 hover:scale-110"
+              >
+                {text}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Buttons & Theme (Desktop) */}
+          <div className="hidden lg:flex items-center gap-3">
+            <Link href="/login">
+              <Button
+                variant="outline"
+                size="sm"
+                className="transition-all duration-200 hover:bg-gray-100 hover:scale-105"
+              >
+                Login
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button
+                size="sm"
+                className="transition-all duration-200 hover:scale-105 hover:shadow-md"
+              >
+                Register
+              </Button>
+            </Link>
+            <ThemeToggle />
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="lg:hidden text-gray-700"
+          >
+            {menuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        {menuOpen && (
+          <div className="lg:hidden bg-white px-6 py-4 border-t shadow">
+            <nav className="flex flex-col gap-4 text-center">
+              {["Features", "About", "Testimonials", "Partners"].map((text) => (
+                <Link
+                  key={text}
+                  href={`/${text.toLowerCase()}`}
+                  className="text-base font-medium text-gray-700 hover:text-primary transition"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {text}
+                </Link>
+              ))}
+              <Link href="/login">
+                <Button
+                  variant="outline"
+                  className="w-full mt-2 transition hover:scale-105"
+                >
+                  Login
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button className="w-full mt-1 transition hover:scale-105 hover:shadow-lg">
+                  Register
+                </Button>
+              </Link>
+              <div className="mt-2 flex justify-center">
+                <ThemeToggle />
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
       <main className="flex-1">
         {/* Section 1 */}
