@@ -47,7 +47,7 @@ export default function LoginPage() {
     <div className="flex flex-col min-h-screen">
       {/* <header className="px-4 lg:px-6 h-16 flex items-center border-b">
         <Link href="/" className="flex items-center justify-center">
-          <span className="text-xl font-bold">VideoEarn</span>
+          <span className="text-xl font-bold">Rewards Hub Dollor</span>
         </Link>
         <div className="ml-auto">
           <ThemeToggle />
@@ -59,7 +59,7 @@ export default function LoginPage() {
           href="/"
           className="flex items-center text-xl font-bold text-gray-900"
         >
-          VideoEarn
+          Rewards Hub Dollor
         </Link>
 
         {/* Mobile menu toggle */}

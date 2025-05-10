@@ -13,7 +13,7 @@ export default function TestimonialsSection() {
     },
     {
       quote:
-        "VideoEarn has become my go-to platform for earning extra cash. The videos are interesting and the payments are always on time.",
+        "Rewards Hub Dollor has become my go-to platform for earning extra cash. The videos are interesting and the payments are always on time.",
       name: "Michael Chen",
       location: "Toronto, Canada",
       amount: "$150+",
@@ -41,7 +41,7 @@ export default function TestimonialsSection() {
     },
     {
       quote:
-        "VideoEarn has helped me pay for my monthly subscriptions. It's like getting paid to be entertained!",
+        "Rewards Hub Dollor has helped me pay for my monthly subscriptions. It's like getting paid to be entertained!",
       name: "Thomas Weber",
       location: "Berlin, Germany",
       amount: "$130+",

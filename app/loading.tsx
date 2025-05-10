@@ -1,4 +1,4 @@
-import { Play } from "lucide-react"
+import { Play } from "lucide-react";
 
 export default function Loading() {
   return (
@@ -10,9 +10,11 @@ export default function Loading() {
             <Play className="h-10 w-10 text-primary" />
           </div>
         </div>
-        <h2 className="mt-4 text-xl font-bold text-foreground">VideoEarn</h2>
+        <h2 className="mt-4 text-xl font-bold text-foreground">
+          Rewards Hub Dollor
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
       </div>
     </div>
-  )
+  );
 }

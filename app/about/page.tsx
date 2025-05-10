@@ -52,7 +52,7 @@ export default function AboutPage() {
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  About VideoEarn
+                  About Rewards Hub Dollor
                 </h1>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl">
                   Our mission is to reward users for their time and attention.
@@ -63,11 +63,11 @@ export default function AboutPage() {
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold">Our Story</h2>
                 <p className="text-muted-foreground">
-                  VideoEarn was founded in 2023 with a simple idea: what if
-                  people could earn money by watching videos they're already
-                  interested in? Our founders recognized that people's attention
-                  is valuable, and advertisers are willing to pay for it.
-                  Instead of all that value going to big tech companies, we
+                  Rewards Hub Dollor was founded in 2023 with a simple idea:
+                  what if people could earn money by watching videos they're
+                  already interested in? Our founders recognized that people's
+                  attention is valuable, and advertisers are willing to pay for
+                  it. Instead of all that value going to big tech companies, we
                   decided to share it directly with our users.
                 </p>
                 <p className="text-muted-foreground">
