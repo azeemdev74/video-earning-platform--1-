@@ -91,8 +91,8 @@ export default function Home() {
         </div>
       </header> */}
       <header
-        className={`sticky top-0 z-50 w-full bg-white dark:bg-black border-b dark:border-gray-800 shadow-sm transition-all duration-300 ${
-          scrolled ? "h-16" : "h-20"
+        className={`sticky top-0 z-50 w-full bg-white dark:bg-black border-b dark:border-gray-800 transition-all duration-300 ${
+          scrolled ? "h-16 shadow-lg dark:shadow-gray-800/50" : "h-20 shadow-sm"
         }`}
       >
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
@@ -112,7 +112,7 @@ export default function Home() {
             </span>
           </Link>
 
-          {/* Desktop Navigation with Larger Text and Zoom Effect */}
+          {/* Desktop Navigation with Larger Text */}
           <nav className="hidden lg:flex flex-1 justify-center gap-10">
             {["Features", "About", "Testimonials", "Partners"].map((text) => (
               <Link
@@ -164,10 +164,12 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Mobile Menu with Larger Text */}
+        {/* Mobile Menu */}
         <div
           className={`lg:hidden bg-white dark:bg-black overflow-hidden transition-all duration-300 ease-in-out ${
-            menuOpen ? "max-h-96 border-t dark:border-gray-800" : "max-h-0"
+            menuOpen
+              ? "max-h-96 border-t dark:border-gray-800 shadow-inner"
+              : "max-h-0"
           }`}
         >
           <div className="px-4 py-3 flex flex-col space-y-4">
