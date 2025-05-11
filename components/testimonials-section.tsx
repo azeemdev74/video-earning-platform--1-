@@ -69,7 +69,7 @@ export default function TestimonialSlider() {
     if (isAutoPlaying) {
       intervalId = setInterval(() => {
         nextSlide();
-      }, 7000); // Change slide every 7 seconds
+      }, 5000); // Change slide every 7 seconds
     }
 
     return () => {
