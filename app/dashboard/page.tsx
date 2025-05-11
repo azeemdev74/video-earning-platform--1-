@@ -225,7 +225,7 @@ export default function DashboardPage() {
             <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
             <div className="space-y-2">
               <Link
-                href="#"
+                href="/withdraw"
                 className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
               >
                 <div className="flex items-center gap-3">
