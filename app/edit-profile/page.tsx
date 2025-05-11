@@ -1,45 +1,16 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import React from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Play, LogOut, X, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { LogOut, Menu, Play, X } from "lucide-react";
+
 import Footer from "@/components/footer";
 
-const WithdrawPage = () => {
-  const paymentMethods = [
-    {
-      name: "WhatsApp Payout",
-      description:
-        "Join our WhatsApp group to receive payout, updates, get support, and stay informed about the latest payment methods and announcements.",
-      img: "/img/payout/whatsapp-payout.png",
-      isWhatsApp: true,
-      whatsappLink: "https://wa.me/+923426015759", // Replace with your WhatsApp number
-    },
-    {
-      name: "PayPal",
-      description: "Get paid by direct transfer into your PayPal account.",
-      img: "/img/payout/paypal-payout.png",
-    },
-    {
-      name: "JazzCash",
-      description: "Get paid by direct transfer into your JazzCash wallet.",
-      img: "/img/payout/jazzcash-payout.png",
-    },
-    {
-      name: "Binance",
-      description: "Get paid by direct transfer into your Binance wallet.",
-      img: "/img/payout/binance-payout.png",
-    },
-    {
-      name: "Bank Transfer",
-      description: "Get paid by direct transfer into your Bank account.",
-      img: "/img/payout/bank-payout.png",
-    },
-  ];
+export default function EditProfilePage() {
+  const [name, setName] = useState("azeem");
+  const [email, setEmail] = useState("azeemrauf@gmail.com");
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -60,6 +31,12 @@ const WithdrawPage = () => {
       setMenuOpen(false);
     }
   };
+
+  const handleUpdate = () => {
+    alert(`Profile updated:\nName: ${name}\nEmail: ${email}`);
+    // You can integrate API call here
+  };
+
   return (
     <div>
       <header
@@ -163,54 +140,52 @@ const WithdrawPage = () => {
           </div>
         </div>
       </header>
-      <div className="min-h-screen bg-white px-4 py-8 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">
-            Payment Center
-          </h1>
-          <p className="text-xl font-semibold text-green-600 mb-8">
-            $5.59{" "}
-            <span className="text-gray-500 text-base">Account Balance</span>
-          </p>
-        </div>
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 sm:p-10">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">
+            Edit Profile
+          </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {paymentMethods.map((method, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-start"
-            >
-              <h2 className="text-xl font-semibold mb-2">{method.name}</h2>
-              <div className="mb-3">
-                <Image
-                  src={method.img}
-                  alt={method.name}
-                  width={60}
-                  height={40}
-                  className="object-contain"
-                />
-              </div>
-              <p className="text-gray-600 mb-4">{method.description}</p>
-              {method.isWhatsApp ? (
-                <Link
-                  href={method.whatsappLink}
-                  target="_blank"
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
-                >
-                  Join on WhatsApp
-                </Link>
-              ) : (
-                <button className="bg-white border border-green-500 text-green-500 px-4 py-2 rounded-md hover:bg-green-500 hover:text-white transition">
-                  Coming Soon...
-                </button>
-              )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Editable Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Name:
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
             </div>
-          ))}
+
+            {/* Editable Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Email:
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+          </div>
+
+          {/* Update Button */}
+          <div className="mt-10 flex justify-end">
+            <Button
+              onClick={handleUpdate}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
+            >
+              Update
+            </Button>
+          </div>
         </div>
       </div>
       <Footer />
     </div>
   );
-};
-
-export default WithdrawPage;
+}

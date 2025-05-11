@@ -19,9 +19,10 @@ import Footer from "@/components/footer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useSplash } from "@/components/splash-provider";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Menu, X } from "lucide-react";
 
 export default function DashboardPage() {
-  const [balance, setBalance] = useState(5.0);
+  const [balance, setBalance] = useState(30.0);
   const [videosWatched, setVideosWatched] = useState(0);
   const [dailyGoal, setDailyGoal] = useState(0);
   const { setIsLoading } = useSplash();
@@ -31,6 +32,37 @@ export default function DashboardPage() {
   const [canContinue, setCanContinue] = useState(false);
   const [currentVideo, setCurrentVideo] = useState<string | null>(null);
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Simulate initial loading
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [setIsLoading]);
+
+  const sections = ["Dashboard", "Videos", "Task", "Referrals"];
+
+  const scrollToSection = (id: string) => {
+    const section = document.getElementById(id.toLowerCase());
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+      setMenuOpen(false);
+    }
+  };
+
+  //
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
@@ -73,48 +105,110 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen overflow-x-hidden">
-      <header className="px-4 lg:px-6 h-16 flex items-center border-b">
-        <Link href="/" className="flex items-center justify-center">
-          <span className="text-xl font-bold">Rwards Hub Dollor</span>
-        </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link
-            href="/dashboard"
-            className="text-sm font-medium hover:underline underline-offset-4"
-          >
-            Dashboard
+    <div className="flex flex-col min-h-screen">
+      <header
+        className={`sticky top-0 z-50 w-full bg-white dark:bg-black border-b dark:border-gray-800 transition-all duration-300 ${
+          scrolled ? "h-16 shadow-lg dark:shadow-gray-800/50" : "h-20 shadow-sm"
+        }`}
+      >
+        <div className="container mx-auto px-4 h-full flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center group">
+            <Play
+              className={`text-primary transition-all duration-300 ${
+                scrolled ? "h-5 w-5" : "h-6 w-6"
+              } group-hover:scale-110`}
+            />
+            <span
+              className={`ml-2 font-bold transition-all duration-300 ${
+                scrolled ? "text-lg" : "text-xl"
+              } group-hover:text-primary`}
+            >
+              Rewards Hub Dollar
+            </span>
           </Link>
-          <Link
-            href="/dashboard/videos"
-            className="text-sm font-medium hover:underline underline-offset-4"
+
+          {/* Desktop Navigation with Larger Text */}
+          <nav className="hidden lg:flex flex-1 justify-center gap-10">
+            {sections.map((text) => (
+              <a
+                key={text}
+                onClick={() => scrollToSection(text)}
+                // href={`/${text.toLowerCase()}`}
+                className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
+              >
+                <span className="block text-lg font-semibold group-hover:scale-110 group-hover:text-primary transition-transform duration-300 origin-center">
+                  {text}
+                </span>
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+              </a>
+            ))}
+          </nav>
+
+          {/* Buttons */}
+          <div className="hidden lg:flex items-center gap-4">
+            <Link href="/login">
+              <Button variant="ghost" size="icon" className="ml-2">
+                <LogOut className="h-8 w-8" />
+                <span className="sr-only">Logout</span>
+              </Button>
+            </Link>
+            <ThemeToggle />
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="lg:hidden text-gray-700 dark:text-white hover:scale-110 transition-transform duration-300"
+            aria-label="Toggle menu"
           >
-            Videos
-          </Link>
-          <Link
-            href="/dashboard/earnings"
-            className="text-sm font-medium hover:underline underline-offset-4"
-          >
-            Earnings
-          </Link>
-          <Link
-            href="/dashboard/settings"
-            className="text-sm font-medium hover:underline underline-offset-4"
-          >
-            Settings
-          </Link>
-        </nav>
-        <div className="ml-2">
-          <ThemeToggle />
+            {menuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
+          </button>
         </div>
-        <Button variant="ghost" size="icon" className="ml-2">
-          <LogOut className="h-5 w-5" />
-          <span className="sr-only">Logout</span>
-        </Button>
+
+        {/* Mobile Menu */}
+        <div
+          className={`lg:hidden bg-white dark:bg-black overflow-hidden transition-all duration-300 ease-in-out ${
+            menuOpen
+              ? "max-h-96 border-t dark:border-gray-800 shadow-inner"
+              : "max-h-0"
+          }`}
+        >
+          <div className="px-4 py-3 flex flex-col space-y-4">
+            {sections.map((text) => (
+              <a
+                key={text}
+                href={`/${text.toLowerCase()}`}
+                className="py-3 px-3 text-lg font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105 transition-all duration-200 origin-left"
+                onClick={() => setMenuOpen(false)}
+              >
+                {text}
+              </a>
+            ))}
+            <div className="pt-3 flex gap-4">
+              <Link
+                href="/login"
+                className="flex-1"
+                onClick={() => setMenuOpen(false)}
+              >
+                <Button variant="ghost" size="icon" className="ml-2">
+                  <LogOut className="h-5 w-5" />
+                  <span className="sr-only">Logout</span>
+                </Button>
+              </Link>
+
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
       </header>
 
       <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
+        <div id="dashboard" className="mb-8">
           <h1 className="text-2xl font-bold">Welcome back, User!</h1>
           <p className="text-muted-foreground">
             Here's an overview of your account
@@ -130,7 +224,7 @@ export default function DashboardPage() {
             </div>
             <p className="text-2xl font-bold">${balance.toFixed(2)}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              ${(balance - 5).toFixed(2)} earned + $30.00 bonus
+              ${(balance - 30).toFixed(2)} earned + $30.00 bonus
             </p>
           </div>
 
@@ -142,7 +236,7 @@ export default function DashboardPage() {
             </div>
             <p className="text-2xl font-bold">{videosWatched}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              ${(videosWatched * 0.25).toFixed(2)} earned from videos
+              ${(videosWatched * 3).toFixed(2)} earned from videos
             </p>
           </div>
 
@@ -174,136 +268,93 @@ export default function DashboardPage() {
         </div>
 
         {/* Recommended Videos */}
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <div className="md:col-span-2 rounded-lg border bg-card p-6 shadow-sm">
-            <h2 className="text-xl font-bold mb-4">Recommended Videos</h2>
-            <div className="space-y-4">
-              {[
-                { id: "dQw4w9WgXcQ", title: "Learn Fast" },
-                { id: "9bZkp7q19f0", title: "Motivation 101" },
-                { id: "3JZ_D3ELwOQ", title: "Success Hacks" },
-              ].map((video) => (
-                <div
-                  key={video.id}
-                  className="flex flex-col sm:flex-row items-center gap-4 p-3 rounded-lg border hover:bg-muted cursor-pointer"
-                >
-                  <div className="relative w-full sm:w-32 h-20 rounded overflow-hidden flex-shrink-0">
-                    <img
-                      src={`https://img.youtube.com/vi/${video.id}/0.jpg`}
-                      alt={`Thumbnail`}
-                      className="object-cover w-full h-full"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="h-8 w-8 rounded-full bg-black/60 flex items-center justify-center">
-                        <Play className="h-4 w-4 text-white" />
+        <section id="videos">
+          <div className="grid gap-6 md:grid-cols-3 mb-8">
+            <div className="md:col-span-2 rounded-lg border bg-card p-6 shadow-sm">
+              <h2 className="text-xl font-bold mb-4">Recommended Videos</h2>
+              <div className="space-y-4">
+                {[
+                  { id: "dQw4w9WgXcQ", title: "Learn Fast" },
+                  { id: "9bZkp7q19f0", title: "Motivation 101" },
+                  { id: "3JZ_D3ELwOQ", title: "Success Hacks" },
+                ].map((video) => (
+                  <div
+                    key={video.id}
+                    className="flex flex-col sm:flex-row items-center gap-4 p-3 rounded-lg border hover:bg-muted cursor-pointer"
+                  >
+                    <div className="relative w-full sm:w-32 h-20 rounded overflow-hidden flex-shrink-0">
+                      <img
+                        src={`https://img.youtube.com/vi/${video.id}/0.jpg`}
+                        alt={`Thumbnail`}
+                        className="object-cover w-full h-full"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-8 w-8 rounded-full bg-black/60 flex items-center justify-center">
+                          <Play className="h-4 w-4 text-white" />
+                        </div>
                       </div>
                     </div>
+                    <div className="flex-1 w-full">
+                      <h3 className="font-medium">{video.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Duration: ~3min • Earn: $3
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => startVideo(video.id)}
+                    >
+                      Watch
+                    </Button>
                   </div>
-                  <div className="flex-1 w-full">
-                    <h3 className="font-medium">{video.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Duration: ~3min • Earn: $3
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => startVideo(video.id)}
-                  >
-                    Watch
-                  </Button>
-                </div>
-              ))}
+                ))}
+              </div>
+              <div className="mt-4 text-center">
+                <Button variant="link">View All Videos</Button>
+              </div>
             </div>
-            <div className="mt-4 text-center">
-              <Button variant="link">View All Videos</Button>
-            </div>
-          </div>
 
-          {/* Quick Actions */}
-          <div className="rounded-lg border bg-card p-6 shadow-sm">
-            <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-            <div className="space-y-2">
-              <Link
-                href="/withdraw"
-                className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
-              >
-                <div className="flex items-center gap-3">
-                  <CreditCard className="h-5 w-5 text-primary" />
-                  <span>Withdraw Earnings</span>
-                </div>
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="#"
-                className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
-              >
-                <div className="flex items-center gap-3">
-                  <User className="h-5 w-5 text-primary" />
-                  <span>Edit Profile</span>
-                </div>
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="#"
-                className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
-              >
-                <div className="flex items-center gap-3">
-                  <Settings className="h-5 w-5 text-primary" />
-                  <span>Account Settings</span>
-                </div>
-                <ChevronRight className="h-4 w-4" />
-              </Link>
+            {/* Quick Actions */}
+            <div className="rounded-lg border bg-card p-6 shadow-sm">
+              <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
+              <div className="space-y-2">
+                <Link
+                  href="/withdraw"
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
+                >
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                    <span>Withdraw Earnings</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/edit-profile"
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
+                >
+                  <div className="flex items-center gap-3">
+                    <User className="h-5 w-5 text-primary" />
+                    <span>Edit Profile</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/account-settings"
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
+                >
+                  <div className="flex items-center gap-3">
+                    <Settings className="h-5 w-5 text-primary" />
+                    <span>Account Settings</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Recent Earnings */}
-        <div className="rounded-lg border bg-card p-6 shadow-sm">
-          <h2 className="text-xl font-bold mb-4">Recent Earnings</h2>
-          <div className="overflow-x-auto w-full">
-            <table className="w-full min-w-[300px]">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-2">Date</th>
-                  <th className="text-left p-2">Activity</th>
-                  <th className="text-left p-2">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className="p-2 text-sm">
-                    {new Date().toLocaleDateString()}
-                  </td>
-                  <td className="p-2 text-sm">Sign Up Bonus</td>
-                  <td className="p-2 text-sm text-green-600">+$30.00</td>
-                </tr>
-                {videosWatched > 0 ? (
-                  <tr className="border-b">
-                    <td className="p-2 text-sm">
-                      {new Date().toLocaleDateString()}
-                    </td>
-                    <td className="p-2 text-sm">
-                      Watched {videosWatched} videos
-                    </td>
-                    <td className="p-2 text-sm text-green-600">
-                      +${(videosWatched * 0.25).toFixed(2)}
-                    </td>
-                  </tr>
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={3}
-                      className="p-2 text-sm text-center text-muted-foreground"
-                    >
-                      No recent earnings. Start watching videos to earn money!
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </main>
 
       {/* Video Modal */}
