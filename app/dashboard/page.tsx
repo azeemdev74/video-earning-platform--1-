@@ -202,7 +202,7 @@ export default function DashboardPage() {
                   <div className="flex-1 w-full">
                     <h3 className="font-medium">{video.title}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Duration: ~3min • Earn: $0.25
+                      Duration: ~3min • Earn: $3
                     </p>
                   </div>
                   <Button
@@ -325,7 +325,7 @@ export default function DashboardPage() {
             </p>
           ) : (
             <div className="text-center">
-              <Button onClick={handleContinue}>Continue & Earn $0.25</Button>
+              <Button onClick={handleContinue}>Continue & Earn $3</Button>
             </div>
           )}
         </DialogContent>
