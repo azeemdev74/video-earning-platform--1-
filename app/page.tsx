@@ -43,53 +43,18 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [setIsLoading]);
 
+  const sections = ["Features", "About", "Testimonials", "Partners"];
+
+  const scrollToSection = (id: string) => {
+    const section = document.getElementById(id.toLowerCase());
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+      setMenuOpen(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
-      {/* <header className="px-4 lg:px-6 h-16 flex items-center border-b">
-        <Link href="/" className="flex items-center justify-center">
-          <Play className="h-6 w-6 text-primary" />
-          <span className="ml-2 text-xl font-bold">Rewards Hub Dollor</span>
-        </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link
-            href="/features"
-            className="text-sm font-medium hover:underline underline-offset-4"
-          >
-            Features
-          </Link>
-          <Link
-            href="/about"
-            className="text-sm font-medium hover:underline underline-offset-4"
-          >
-            About
-          </Link>
-          <Link
-            href="/testimonials"
-            className="text-sm font-medium hover:underline underline-offset-4"
-          >
-            Testimonials
-          </Link>
-          <Link
-            href="/partners"
-            className="text-sm font-medium hover:underline underline-offset-4"
-          >
-            Partners
-          </Link>
-        </nav>
-        <div className="ml-4 flex items-center gap-2">
-          <Link href="/login">
-            <Button variant="outline" size="sm">
-              Login
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button size="sm">Register</Button>
-          </Link>
-        </div>
-        <div className="ml-2">
-          <ThemeToggle />
-        </div>
-      </header> */}
       <header
         className={`sticky top-0 z-50 w-full bg-white dark:bg-black border-b dark:border-gray-800 transition-all duration-300 ${
           scrolled ? "h-16 shadow-lg dark:shadow-gray-800/50" : "h-20 shadow-sm"
@@ -114,17 +79,18 @@ export default function Home() {
 
           {/* Desktop Navigation with Larger Text */}
           <nav className="hidden lg:flex flex-1 justify-center gap-10">
-            {["Features", "About", "Testimonials", "Partners"].map((text) => (
-              <Link
+            {sections.map((text) => (
+              <a
                 key={text}
-                href={`/${text.toLowerCase()}`}
-                className="relative px-2 py-1 group transition-all duration-300"
+                onClick={() => scrollToSection(text)}
+                // href={`/${text.toLowerCase()}`}
+                className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
               >
                 <span className="block text-lg font-semibold group-hover:scale-110 group-hover:text-primary transition-transform duration-300 origin-center">
                   {text}
                 </span>
                 <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-              </Link>
+              </a>
             ))}
           </nav>
 
@@ -173,15 +139,15 @@ export default function Home() {
           }`}
         >
           <div className="px-4 py-3 flex flex-col space-y-4">
-            {["Features", "About", "Testimonials", "Partners"].map((text) => (
-              <Link
+            {sections.map((text) => (
+              <a
                 key={text}
                 href={`/${text.toLowerCase()}`}
                 className="py-3 px-3 text-lg font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105 transition-all duration-200 origin-left"
                 onClick={() => setMenuOpen(false)}
               >
                 {text}
-              </Link>
+              </a>
             ))}
             <div className="pt-3 flex gap-4">
               <Link
@@ -269,7 +235,7 @@ export default function Home() {
           </div>
         </section>
         {/* Section 2 */}
-        <section className="px-6 py-16 lg:py-24">
+        <section id="about" className="px-6 py-16 lg:py-24">
           <div className="flex flex-col lg:flex-row gap-16 lg:gap-28 max-w-7xl mx-auto items-center justify-between">
             {/* Left Stats Section */}
             <motion.div
@@ -352,7 +318,7 @@ export default function Home() {
           </div>
         </section>
         {/* Section 3 payout method */}
-        <section className="px-4 py-16 my-24">
+        <section id="features" className="px-4 py-16 my-24">
           <div className="max-w-7xl mx-auto flex flex-col-reverse lg:flex-row items-center justify-between gap-10">
             {/* Left Content */}
             <motion.div
@@ -457,8 +423,14 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
-        <TestimonialsSection />
-        <PartnersSection />
+        <section id="testimonials">
+          {" "}
+          <TestimonialsSection />
+        </section>
+        <section id="partners">
+          {" "}
+          <PartnersSection />
+        </section>
       </main>
       <Footer />
     </div>

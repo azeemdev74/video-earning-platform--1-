@@ -107,137 +107,44 @@ export default function TestimonialSlider() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <motion.h2
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
-          >
-            What our users said
-          </motion.h2>
-          <motion.p
+    <AnimatePresence custom={direction} mode="wait">
+      <motion.div
+        key={currentIndex}
+        custom={direction}
+        variants={cardVariants}
+        initial="enter"
+        animate="center"
+        exit="exit"
+        className="w-full flex justify-center pt-0 sm:pt-28"
+      >
+        <div className="max-w-xl w-full bg-gray-50 dark:bg-gray-800 p-8 md:p-10 rounded-xl shadow-lg text-center">
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="text-lg md:text-xl text-gray-600 dark:text-gray-300"
+            transition={{ delay: 0.4 }}
           >
-            They are doing great things with us
-          </motion.p>
-        </div>
-
-        <div
-          className="relative"
-          onMouseEnter={() => setIsAutoPlaying(false)}
-          onMouseLeave={() => setIsAutoPlaying(true)}
-        >
-          <AnimatePresence custom={direction} mode="wait">
-            <motion.div
-              key={currentIndex}
-              custom={direction}
-              variants={cardVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              className="w-full"
-            >
-              <div className="flex flex-col lg:flex-row gap-8">
-                {/* Left side - Feedback text */}
-                <div className="lg:w-1/2 bg-gray-50 dark:bg-gray-800 p-8 md:p-10 rounded-xl shadow-lg">
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                  >
-                    <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
-                      {testimonials[currentIndex].text}
-                    </p>
-                    <div>
-                      <p className="font-semibold text-xl text-gray-900 dark:text-white">
-                        {testimonials[currentIndex].author}
-                      </p>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        {testimonials[currentIndex].role}
-                      </p>
-                      <p className="text-gray-500 dark:text-gray-500 text-sm mt-1">
-                        {testimonials[currentIndex].country}
-                      </p>
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Right side - Client picture */}
-                <div className="lg:w-1/2 flex items-center justify-center">
-                  <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.6, type: "spring" }}
-                    className="relative w-full h-64 md:h-96 rounded-xl overflow-hidden shadow-xl"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20" />
-                    <img
-                      src={testimonials[currentIndex].image}
-                      alt={testimonials[currentIndex].author}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-                      <p className="text-white text-lg font-medium">
-                        {testimonials[currentIndex].author}
-                      </p>
-                      <p className="text-gray-300 text-sm">
-                        {testimonials[currentIndex].role}
-                      </p>
-                    </div>
-                  </motion.div>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Navigation Arrows */}
-          <button
-            onClick={() => {
-              prevSlide();
-              pauseAutoPlay();
-            }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 md:-ml-6 bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all z-10 hover:scale-110"
-            aria-label="Previous testimonial"
-          >
-            <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-          </button>
-          <button
-            onClick={() => {
-              nextSlide();
-              pauseAutoPlay();
-            }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 md:-mr-6 bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all z-10 hover:scale-110"
-            aria-label="Next testimonial"
-          >
-            <ChevronRight className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-          </button>
-
-          {/* Dots Indicator */}
-          <div className="flex justify-center mt-8 space-x-2">
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  goToSlide(index);
-                  pauseAutoPlay();
-                }}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  index === currentIndex
-                    ? "bg-primary w-6 dark:bg-primary-400"
-                    : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
-                }`}
-                aria-label={`Go to testimonial ${index + 1}`}
+            <div className="w-24 h-24 mx-auto rounded-full overflow-hidden mb-4 border-4 border-primary">
+              <img
+                src={testimonials[currentIndex].image}
+                alt={testimonials[currentIndex].author}
+                className="w-full h-full object-cover"
               />
-            ))}
-          </div>
+            </div>
+            <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
+              "{testimonials[currentIndex].text}"
+            </p>
+            <p className="font-semibold text-xl text-gray-900 dark:text-white">
+              {testimonials[currentIndex].author}
+            </p>
+            <p className="text-gray-600 dark:text-gray-400">
+              {testimonials[currentIndex].role}
+            </p>
+            <p className="text-gray-500 dark:text-gray-500 text-sm mt-1">
+              {testimonials[currentIndex].country}
+            </p>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
