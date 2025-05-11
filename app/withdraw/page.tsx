@@ -6,7 +6,8 @@ import Link from "next/link";
 const paymentMethods = [
   {
     name: "WhatsApp Payout",
-    description: "Chat with our support team to process your WhatsApp payout.",
+    description:
+      "Join our WhatsApp group to receive payout updates, get support, and stay informed about the latest payment methods and announcements.",
     img: "/whatsapp-logo.png",
     isWhatsApp: true,
     whatsappLink: "https://wa.me/+923426015759", // Replace with your WhatsApp number
