@@ -58,7 +58,7 @@ export default function RegisterPage() {
           <div className="space-y-2 text-center">
             <h1 className="text-3xl font-bold">Create an Account</h1>
             <p className="text-muted-foreground">
-              Sign up and get a $5 bonus instantly!
+              Sign up and get a $30 bonus instantly!
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">

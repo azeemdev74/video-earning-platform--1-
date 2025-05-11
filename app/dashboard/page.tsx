@@ -130,7 +130,7 @@ export default function DashboardPage() {
             </div>
             <p className="text-2xl font-bold">${balance.toFixed(2)}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              ${(balance - 5).toFixed(2)} earned + $5.00 bonus
+              ${(balance - 5).toFixed(2)} earned + $30.00 bonus
             </p>
           </div>
 
@@ -276,7 +276,7 @@ export default function DashboardPage() {
                     {new Date().toLocaleDateString()}
                   </td>
                   <td className="p-2 text-sm">Sign Up Bonus</td>
-                  <td className="p-2 text-sm text-green-600">+$5.00</td>
+                  <td className="p-2 text-sm text-green-600">+$30.00</td>
                 </tr>
                 {videosWatched > 0 ? (
                   <tr className="border-b">

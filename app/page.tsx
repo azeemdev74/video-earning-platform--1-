@@ -195,7 +195,7 @@ export default function Home() {
                   </h1>
                   <p className="max-w-[600px] mx-auto lg:mx-0 text-muted-foreground md:text-xl">
                     Join thousands of users who earn money by simply watching
-                    videos on our platform. Sign up today and get a $5 bonus
+                    videos on our platform. Sign up today and get a $30 bonus
                     instantly!
                   </p>
                 </div>
@@ -218,7 +218,7 @@ export default function Home() {
                 </div>
 
                 <p className="max-w-[600px] text-muted-foreground text-center lg:text-left md:text-base py-4">
-                  Sign Up Now & Get $5 Welcome Bonus
+                  Sign Up Now & Get $30 Welcome Bonus
                 </p>
               </motion.div>
 

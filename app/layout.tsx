@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "Rewards Hub Dollor - Watch Videos and Earn Money",
   description:
-    "Join thousands of users who earn money by watching videos on our platform. Sign up today and get a $5 bonus instantly!",
+    "Join thousands of users who earn money by watching videos on our platform. Sign up today and get a $30 bonus instantly!",
   generator: "v0.dev",
 };
 

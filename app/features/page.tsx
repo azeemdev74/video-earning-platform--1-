@@ -151,7 +151,7 @@ export default function FeaturesPage() {
                     </span>
                     <div className="space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        Sign up and get an instant $5 bonus
+                        Sign up and get an instant $30 bonus
                       </p>
                       <p className="text-sm text-muted-foreground">
                         Create your account and receive a welcome bonus
