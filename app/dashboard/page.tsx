@@ -73,57 +73,56 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="px-4 lg:px-6 py-2 flex flex-wrap items-center justify-between gap-2 border-b">
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
+      <header className="px-4 lg:px-6 h-16 flex items-center border-b">
         <Link href="/" className="flex items-center justify-center">
-          <span className="text-lg sm:text-xl font-bold">
-            Rwards Hub Dollor
-          </span>
+          <span className="text-xl font-bold">Rwards Hub Dollor</span>
         </Link>
-        <nav className="flex flex-wrap gap-3 text-sm">
+        <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
             href="/dashboard"
-            className="font-medium hover:underline underline-offset-4"
+            className="text-sm font-medium hover:underline underline-offset-4"
           >
             Dashboard
           </Link>
           <Link
             href="/dashboard/videos"
-            className="font-medium hover:underline underline-offset-4"
+            className="text-sm font-medium hover:underline underline-offset-4"
           >
             Videos
           </Link>
           <Link
             href="/dashboard/earnings"
-            className="font-medium hover:underline underline-offset-4"
+            className="text-sm font-medium hover:underline underline-offset-4"
           >
             Earnings
           </Link>
           <Link
             href="/dashboard/settings"
-            className="font-medium hover:underline underline-offset-4"
+            className="text-sm font-medium hover:underline underline-offset-4"
           >
             Settings
           </Link>
         </nav>
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="ml-2">
           <ThemeToggle />
-          <Button variant="ghost" size="icon">
-            <LogOut className="h-5 w-5" />
-            <span className="sr-only">Logout</span>
-          </Button>
         </div>
+        <Button variant="ghost" size="icon" className="ml-2">
+          <LogOut className="h-5 w-5" />
+          <span className="sr-only">Logout</span>
+        </Button>
       </header>
 
-      <main className="flex-1 py-6 px-3 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold">Welcome back, User!</h1>
-          <p className="text-muted-foreground text-sm">
+      <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold">Welcome back, User!</h1>
+          <p className="text-muted-foreground">
             Here's an overview of your account
           </p>
         </div>
 
-        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          {/* Balance */}
           <div className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <DollarSign className="h-5 w-5 text-primary" />
@@ -135,6 +134,7 @@ export default function DashboardPage() {
             </p>
           </div>
 
+          {/* Videos Watched */}
           <div className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Play className="h-5 w-5 text-primary" />
@@ -146,6 +146,7 @@ export default function DashboardPage() {
             </p>
           </div>
 
+          {/* Daily Goal */}
           <div className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Clock className="h-5 w-5 text-primary" />
@@ -159,6 +160,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Referral */}
           <div className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Gift className="h-5 w-5 text-primary" />
@@ -171,8 +173,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3 mb-8">
-          <div className="lg:col-span-2 rounded-lg border bg-card p-6 shadow-sm">
+        {/* Recommended Videos */}
+        <div className="grid gap-6 md:grid-cols-3 mb-8">
+          <div className="md:col-span-2 rounded-lg border bg-card p-6 shadow-sm">
             <h2 className="text-xl font-bold mb-4">Recommended Videos</h2>
             <div className="space-y-4">
               {[
@@ -184,7 +187,7 @@ export default function DashboardPage() {
                   key={video.id}
                   className="flex flex-col sm:flex-row items-center gap-4 p-3 rounded-lg border hover:bg-muted cursor-pointer"
                 >
-                  <div className="relative w-full max-w-[128px] sm:w-32 sm:h-20 h-20 rounded overflow-hidden">
+                  <div className="relative w-full sm:w-32 h-20 rounded overflow-hidden flex-shrink-0">
                     <img
                       src={`https://img.youtube.com/vi/${video.id}/0.jpg`}
                       alt={`Thumbnail`}
@@ -196,7 +199,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex-1 text-center sm:text-left">
+                  <div className="flex-1 w-full">
                     <h3 className="font-medium">{video.title}</h3>
                     <p className="text-sm text-muted-foreground">
                       Duration: ~3min • Earn: $0.25
@@ -217,34 +220,49 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Quick Actions */}
           <div className="rounded-lg border bg-card p-6 shadow-sm">
             <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
             <div className="space-y-2">
-              {[
-                { icon: CreditCard, label: "Withdraw Earnings" },
-                { icon: User, label: "Edit Profile" },
-                { icon: Settings, label: "Account Settings" },
-              ].map((action, index) => (
-                <Link
-                  key={index}
-                  href="#"
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
-                >
-                  <div className="flex items-center gap-3">
-                    <action.icon className="h-5 w-5 text-primary" />
-                    <span>{action.label}</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
-              ))}
+              <Link
+                href="#"
+                className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
+              >
+                <div className="flex items-center gap-3">
+                  <CreditCard className="h-5 w-5 text-primary" />
+                  <span>Withdraw Earnings</span>
+                </div>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="#"
+                className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
+              >
+                <div className="flex items-center gap-3">
+                  <User className="h-5 w-5 text-primary" />
+                  <span>Edit Profile</span>
+                </div>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="#"
+                className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
+              >
+                <div className="flex items-center gap-3">
+                  <Settings className="h-5 w-5 text-primary" />
+                  <span>Account Settings</span>
+                </div>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </div>
 
+        {/* Recent Earnings */}
         <div className="rounded-lg border bg-card p-6 shadow-sm">
           <h2 className="text-xl font-bold mb-4">Recent Earnings</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full min-w-[300px]">
               <thead>
                 <tr className="border-b">
                   <th className="text-left p-2">Date</th>
@@ -254,15 +272,21 @@ export default function DashboardPage() {
               </thead>
               <tbody>
                 <tr className="border-b">
-                  <td className="p-2">{new Date().toLocaleDateString()}</td>
-                  <td className="p-2">Sign Up Bonus</td>
-                  <td className="p-2 text-green-600">+$5.00</td>
+                  <td className="p-2 text-sm">
+                    {new Date().toLocaleDateString()}
+                  </td>
+                  <td className="p-2 text-sm">Sign Up Bonus</td>
+                  <td className="p-2 text-sm text-green-600">+$5.00</td>
                 </tr>
                 {videosWatched > 0 ? (
                   <tr className="border-b">
-                    <td className="p-2">{new Date().toLocaleDateString()}</td>
-                    <td className="p-2">Watched {videosWatched} videos</td>
-                    <td className="p-2 text-green-600">
+                    <td className="p-2 text-sm">
+                      {new Date().toLocaleDateString()}
+                    </td>
+                    <td className="p-2 text-sm">
+                      Watched {videosWatched} videos
+                    </td>
+                    <td className="p-2 text-sm text-green-600">
                       +${(videosWatched * 0.25).toFixed(2)}
                     </td>
                   </tr>
@@ -270,7 +294,7 @@ export default function DashboardPage() {
                   <tr>
                     <td
                       colSpan={3}
-                      className="p-2 text-center text-muted-foreground"
+                      className="p-2 text-sm text-center text-muted-foreground"
                     >
                       No recent earnings. Start watching videos to earn money!
                     </td>
@@ -282,6 +306,7 @@ export default function DashboardPage() {
         </div>
       </main>
 
+      {/* Video Modal */}
       <Dialog open={showVideoModal} onOpenChange={setShowVideoModal}>
         <DialogContent className="max-w-2xl w-full">
           <div className="relative aspect-video mb-4">
