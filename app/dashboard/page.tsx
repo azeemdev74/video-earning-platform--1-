@@ -18,15 +18,20 @@ import { Progress } from "@/components/ui/progress";
 import Footer from "@/components/footer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useSplash } from "@/components/splash-provider";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function DashboardPage() {
-  const [balance, setBalance] = useState(5.0); // Starting with $5 bonus
+  const [balance, setBalance] = useState(5.0);
   const [videosWatched, setVideosWatched] = useState(0);
   const [dailyGoal, setDailyGoal] = useState(0);
   const { setIsLoading } = useSplash();
 
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [timer, setTimer] = useState(35);
+  const [canContinue, setCanContinue] = useState(false);
+  const [currentVideo, setCurrentVideo] = useState<string | null>(null);
+
   useEffect(() => {
-    // Show splash screen when component mounts
     setIsLoading(true);
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -35,18 +40,36 @@ export default function DashboardPage() {
     return () => clearTimeout(timer);
   }, [setIsLoading]);
 
-  const watchVideo = () => {
-    // Show mini splash before updating
-    setIsLoading(true);
+  useEffect(() => {
+    if (!showVideoModal || timer <= 0) return;
 
-    setTimeout(() => {
-      // Simulate watching a video and earning money
-      const earning = 0.25; // $0.25 per video
-      setBalance((prev) => Number.parseFloat((prev + earning).toFixed(2)));
-      setVideosWatched((prev) => prev + 1);
-      setDailyGoal((prev) => Math.min(prev + 20, 100)); // Increase daily goal progress
-      setIsLoading(false);
-    }, 800);
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setCanContinue(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [showVideoModal, timer]);
+
+  const startVideo = (videoId: string) => {
+    setCurrentVideo(videoId);
+    setTimer(35);
+    setCanContinue(false);
+    setShowVideoModal(true);
+  };
+
+  const handleContinue = () => {
+    setShowVideoModal(false);
+    setCurrentVideo(null);
+    setBalance((prev) => Number.parseFloat((prev + 0.25).toFixed(2)));
+    setVideosWatched((prev) => prev + 1);
+    setDailyGoal((prev) => Math.min(prev + 20, 100));
   };
 
   return (
@@ -89,6 +112,7 @@ export default function DashboardPage() {
           <span className="sr-only">Logout</span>
         </Button>
       </header>
+
       <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold">Welcome back, User!</h1>
@@ -98,6 +122,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          {/* Balance */}
           <div className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <DollarSign className="h-5 w-5 text-primary" />
@@ -109,6 +134,7 @@ export default function DashboardPage() {
             </p>
           </div>
 
+          {/* Videos Watched */}
           <div className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Play className="h-5 w-5 text-primary" />
@@ -120,6 +146,7 @@ export default function DashboardPage() {
             </p>
           </div>
 
+          {/* Daily Goal */}
           <div className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Clock className="h-5 w-5 text-primary" />
@@ -133,6 +160,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Referral */}
           <div className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Gift className="h-5 w-5 text-primary" />
@@ -145,19 +173,24 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Recommended Videos */}
         <div className="grid gap-6 md:grid-cols-3 mb-8">
           <div className="md:col-span-2 rounded-lg border bg-card p-6 shadow-sm">
             <h2 className="text-xl font-bold mb-4">Recommended Videos</h2>
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
+              {[
+                { id: "dQw4w9WgXcQ", title: "Learn Fast" },
+                { id: "9bZkp7q19f0", title: "Motivation 101" },
+                { id: "3JZ_D3ELwOQ", title: "Success Hacks" },
+              ].map((video) => (
                 <div
-                  key={i}
+                  key={video.id}
                   className="flex items-center gap-4 p-3 rounded-lg border hover:bg-muted cursor-pointer"
                 >
                   <div className="relative h-20 w-32 rounded overflow-hidden">
                     <img
-                      src={`/placeholder.svg?height=80&width=128`}
-                      alt={`Video thumbnail ${i}`}
+                      src={`https://img.youtube.com/vi/${video.id}/0.jpg`}
+                      alt={`Thumbnail`}
                       className="object-cover w-full h-full"
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -167,12 +200,16 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium">Video Title {i}</h3>
+                    <h3 className="font-medium">{video.title}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Duration: 3:45 • Earn: $0.25
+                      Duration: ~3min • Earn: $0.25
                     </p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={watchVideo}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => startVideo(video.id)}
+                  >
                     Watch
                   </Button>
                 </div>
@@ -183,6 +220,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Quick Actions */}
           <div className="rounded-lg border bg-card p-6 shadow-sm">
             <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
             <div className="space-y-2">
@@ -220,6 +258,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Recent Earnings */}
         <div className="rounded-lg border bg-card p-6 shadow-sm">
           <h2 className="text-xl font-bold mb-4">Recent Earnings</h2>
           <div className="overflow-x-auto">
@@ -267,6 +306,32 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+
+      {/* Video Modal */}
+      <Dialog open={showVideoModal} onOpenChange={setShowVideoModal}>
+        <DialogContent className="max-w-2xl w-full">
+          <div className="relative aspect-video mb-4">
+            {currentVideo && (
+              <iframe
+                className="w-full h-full rounded"
+                src={`https://www.youtube.com/embed/${currentVideo}?autoplay=1&controls=1`}
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+              />
+            )}
+          </div>
+          {!canContinue ? (
+            <p className="text-center text-sm text-muted-foreground">
+              Please watch for {timer} seconds...
+            </p>
+          ) : (
+            <div className="text-center">
+              <Button onClick={handleContinue}>Continue & Earn $0.25</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );
