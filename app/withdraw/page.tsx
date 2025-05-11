@@ -8,29 +8,29 @@ const paymentMethods = [
     name: "WhatsApp Payout",
     description:
       "Join our WhatsApp group to receive payout updates, get support, and stay informed about the latest payment methods and announcements.",
-    img: "/whatsapp-logo.png",
+    img: "/img/payout/whatsapp-payout.png",
     isWhatsApp: true,
     whatsappLink: "https://wa.me/+923426015759", // Replace with your WhatsApp number
   },
   {
     name: "PayPal",
     description: "Get paid by direct transfer into your PayPal account.",
-    img: "/paypal-logo.png",
+    img: "/img/payout/paypal-payout.png",
   },
   {
     name: "JazzCash",
     description: "Get paid by direct transfer into your JazzCash wallet.",
-    img: "/cashapp-logo.png",
+    img: "/img/payout/jazzcash-payout.png",
   },
   {
     name: "Binance",
     description: "Get paid by direct transfer into your Binance wallet.",
-    img: "/paytm-logo.png",
+    img: "/img/payout/binance-payout.png",
   },
   {
     name: "Bank Transfer",
     description: "Get paid by direct transfer into your Bank account.",
-    img: "/bank-transfer-logo.png",
+    img: "/img/payout/bank-payout.png",
   },
 ];
 
@@ -69,7 +69,7 @@ const WithdrawPage = () => {
                 target="_blank"
                 className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
               >
-                Chat on WhatsApp
+                Join on WhatsApp
               </Link>
             ) : (
               <button className="bg-white border border-green-500 text-green-500 px-4 py-2 rounded-md hover:bg-green-500 hover:text-white transition">
