@@ -18,7 +18,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useSplash } from "@/components/splash-provider";
 import { Menu, X } from "lucide-react";
 import { motion } from "framer-motion";
-import "./page.css";
 
 export default function Home() {
   const { setIsLoading } = useSplash();

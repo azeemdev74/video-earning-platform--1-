@@ -1,77 +1,79 @@
 "use client";
 
-import type React from "react";
-
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
+
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, firestore } from "@/app/utils/firebaseConfig";
+
+import { doc, setDoc } from "firebase/firestore";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import Footer from "@/components/footer";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useSplash } from "@/components/splash-provider";
 
 export default function RegisterPage() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
-  const { setIsLoading } = useSplash();
 
-  useEffect(() => {
-    // Show splash screen when component mounts
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-
-    return () => clearTimeout(timer);
-  }, [setIsLoading]);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Show splash screen before navigation
-    setIsLoading(true);
-    // In a real app, you would register the user here
-    // For demo purposes, we'll just redirect to the dashboard
-    setTimeout(() => {
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      // Store user details in Firestore
+      await setDoc(doc(firestore, "users", user.uid), {
+        email: user.email,
+        createdAt: new Date().toISOString(),
+        uid: user.uid,
+        // Add any other details you want to save here
+      });
+
       router.push("/dashboard");
-    }, 500);
+    } catch (err: any) {
+      setError(err.message || "Registration failed.");
+    }
   };
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="px-4 lg:px-6 h-16 flex items-center border-b">
-        <Link href="/" className="flex items-center justify-center">
-          <span className="text-xl font-bold">Rewards Hub Dollor</span>
+      <header className="px-4 lg:px-6 h-16 flex items-center justify-between border-b bg-white shadow-sm">
+        <Link href="/" className="text-xl font-bold text-gray-900">
+          Rewards Hub Dollor
         </Link>
-        <div className="ml-auto">
+        <div className="hidden lg:flex items-center space-x-4">
           <ThemeToggle />
         </div>
       </header>
+
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="mx-auto w-full max-w-md space-y-6">
           <div className="space-y-2 text-center">
             <h1 className="text-3xl font-bold">Create an Account</h1>
             <p className="text-muted-foreground">
-              Sign up and get a $30 bonus instantly!
+              Register with your email and password
             </p>
           </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                placeholder="John Doe"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -85,53 +87,23 @@ export default function RegisterPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                  <span className="sr-only">
-                    {showPassword ? "Hide password" : "Show password"}
-                  </span>
-                </Button>
-              </div>
+              <Input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox id="terms" required />
-              <label
-                htmlFor="terms"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                I agree to the{" "}
-                <Link
-                  href="#"
-                  className="text-primary underline-offset-4 hover:underline"
-                >
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link
-                  href="#"
-                  className="text-primary underline-offset-4 hover:underline"
-                >
-                  Privacy Policy
-                </Link>
-              </label>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
             </div>
             <Button type="submit" className="w-full">
               Register
@@ -150,6 +122,7 @@ export default function RegisterPage() {
           </div>
         </div>
       </main>
+
       <Footer />
     </div>
   );

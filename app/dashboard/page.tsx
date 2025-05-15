@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+} from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { app, auth, db } from "@/app/utils/firebaseConfig";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
@@ -22,7 +32,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Menu, X } from "lucide-react";
 
 export default function DashboardPage() {
-  const [balance, setBalance] = useState(30.0);
+  const [balance, setBalance] = useState(0);
   const [videosWatched, setVideosWatched] = useState(0);
   const [dailyGoal, setDailyGoal] = useState(0);
   const { setIsLoading } = useSplash();
@@ -34,6 +44,10 @@ export default function DashboardPage() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const sections = ["Dashboard", "Videos", "Task", "Referrals"];
+
+  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -42,36 +56,56 @@ export default function DashboardPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Simulate initial loading
+  // Initial loading effect
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-
     return () => clearTimeout(timer);
   }, [setIsLoading]);
 
-  const sections = ["Dashboard", "Videos", "Task", "Referrals"];
-
-  const scrollToSection = (id: string) => {
-    const section = document.getElementById(id.toLowerCase());
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
-      setMenuOpen(false);
-    }
-  };
-
-  //
+  // Fetch user data from Firestore with auth state listener
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          setIsLoading(true);
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
 
-    return () => clearTimeout(timer);
-  }, [setIsLoading]);
+          if (userDocSnap.exists()) {
+            const data = userDocSnap.data();
+            setBalance(data.balance || 0);
+            setVideosWatched(data.videosWatched || 0);
+            setDailyGoal(data.dailyGoal || 0);
+          } else {
+            // Initialize new user document with $30 registration bonus
+            const initialBalance = 30.0;
+            await setDoc(userDocRef, {
+              balance: initialBalance,
+              videosWatched: 0,
+              dailyGoal: 0,
+              videoHistory: [],
+              dailyWatchHistory: {},
+              createdAt: new Date().toISOString(),
+              lastActiveDate: new Date().toISOString().slice(0, 10),
+              hasReceivedSignupBonus: true,
+            });
+            setBalance(initialBalance);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    });
 
+    return () => unsubscribe();
+  }, []);
+
+  // Video timer effect
   useEffect(() => {
     if (!showVideoModal || timer <= 0) return;
 
@@ -89,6 +123,14 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, [showVideoModal, timer]);
 
+  const scrollToSection = (id: string) => {
+    const section = document.getElementById(id.toLowerCase());
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+      setMenuOpen(false);
+    }
+  };
+
   const startVideo = (videoId: string) => {
     setCurrentVideo(videoId);
     setTimer(35);
@@ -96,12 +138,41 @@ export default function DashboardPage() {
     setShowVideoModal(true);
   };
 
-  const handleContinue = () => {
-    setShowVideoModal(false);
-    setCurrentVideo(null);
-    setBalance((prev) => Number.parseFloat((prev + 0.25).toFixed(2)));
-    setVideosWatched((prev) => prev + 1);
-    setDailyGoal((prev) => Math.min(prev + 20, 100));
+  const handleContinue = async () => {
+    if (!auth.currentUser || !currentVideo) return;
+
+    try {
+      const userDocRef = doc(db, "users", auth.currentUser.uid);
+      const today = new Date().toISOString().slice(0, 10);
+
+      // Calculate new values - earning $3 per video
+      const newBalance = Number((balance + 3).toFixed(2));
+      const newVideosWatched = videosWatched + 1;
+      const newDailyGoal = Math.min(dailyGoal + 20, 100);
+
+      // Update Firestore
+      await updateDoc(userDocRef, {
+        balance: newBalance,
+        videosWatched: newVideosWatched,
+        dailyGoal: newDailyGoal,
+        videoHistory: arrayUnion({
+          videoId: currentVideo,
+          watchedAt: new Date().toISOString(),
+          earned: 3,
+        }),
+        [`dailyWatchHistory.${today}`]: newVideosWatched,
+        lastActiveDate: today,
+      });
+
+      // Update local state
+      setBalance(newBalance);
+      setVideosWatched(newVideosWatched);
+      setDailyGoal(newDailyGoal);
+      setShowVideoModal(false);
+      setCurrentVideo(null);
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    }
   };
 
   return (
@@ -112,7 +183,6 @@ export default function DashboardPage() {
         }`}
       >
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
-          {/* Logo */}
           <Link href="/" className="flex items-center group">
             <Play
               className={`text-primary transition-all duration-300 ${
@@ -128,13 +198,11 @@ export default function DashboardPage() {
             </span>
           </Link>
 
-          {/* Desktop Navigation with Larger Text */}
           <nav className="hidden lg:flex flex-1 justify-center gap-10">
             {sections.map((text) => (
               <a
                 key={text}
                 onClick={() => scrollToSection(text)}
-                // href={`/${text.toLowerCase()}`}
                 className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
               >
                 <span className="block text-lg font-semibold group-hover:scale-110 group-hover:text-primary transition-transform duration-300 origin-center">
@@ -145,7 +213,6 @@ export default function DashboardPage() {
             ))}
           </nav>
 
-          {/* Buttons */}
           <div className="hidden lg:flex items-center gap-4">
             <Link href="/login">
               <Button variant="ghost" size="icon" className="ml-2">
@@ -156,7 +223,6 @@ export default function DashboardPage() {
             <ThemeToggle />
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="lg:hidden text-gray-700 dark:text-white hover:scale-110 transition-transform duration-300"
@@ -170,7 +236,6 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         <div
           className={`lg:hidden bg-white dark:bg-black overflow-hidden transition-all duration-300 ease-in-out ${
             menuOpen
@@ -200,7 +265,6 @@ export default function DashboardPage() {
                   <span className="sr-only">Logout</span>
                 </Button>
               </Link>
-
               <ThemeToggle />
             </div>
           </div>
@@ -216,19 +280,18 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          {/* Balance */}
           <div className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <DollarSign className="h-5 w-5 text-primary" />
               <h3 className="font-medium">Current Balance</h3>
             </div>
-            <p className="text-2xl font-bold">${balance.toFixed(2)}</p>
+            <p className="text-2xl font-bold">${(balance + 30).toFixed(2)}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              ${(balance - 30).toFixed(2)} earned + $30.00 bonus
+              ${balance >= 30 ? (balance - 30).toFixed(2) : "0.00"} earned +
+              $30.00 bonus
             </p>
           </div>
 
-          {/* Videos Watched */}
           <div className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Play className="h-5 w-5 text-primary" />
@@ -240,7 +303,6 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Daily Goal */}
           <div className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Clock className="h-5 w-5 text-primary" />
@@ -254,7 +316,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Referral */}
           <div className="rounded-lg border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Gift className="h-5 w-5 text-primary" />
@@ -267,7 +328,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recommended Videos */}
         <section id="videos">
           <div className="grid gap-6 md:grid-cols-3 mb-8">
             <div className="md:col-span-2 rounded-lg border bg-card p-6 shadow-sm">
@@ -315,7 +375,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Quick Actions */}
             <div className="rounded-lg border bg-card p-6 shadow-sm">
               <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
               <div className="space-y-2">
@@ -353,11 +412,8 @@ export default function DashboardPage() {
             </div>
           </div>
         </section>
-
-        {/* Recent Earnings */}
       </main>
 
-      {/* Video Modal */}
       <Dialog open={showVideoModal} onOpenChange={setShowVideoModal}>
         <DialogContent className="max-w-2xl w-full">
           <div className="relative aspect-video mb-4">

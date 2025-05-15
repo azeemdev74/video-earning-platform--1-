@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import React from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "@/app/utils/firebaseConfig";
 import Image from "next/image";
 import Link from "next/link";
 import { Play, LogOut, X, Menu } from "lucide-react";
@@ -10,6 +12,12 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import Footer from "@/components/footer";
 
 const WithdrawPage = () => {
+  const [balance, setBalance] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
   const paymentMethods = [
     {
       name: "WhatsApp Payout",
@@ -17,7 +25,7 @@ const WithdrawPage = () => {
         "Join our WhatsApp group to receive payout, updates, get support, and stay informed about the latest payment methods and announcements.",
       img: "/img/payout/whatsapp-payout.png",
       isWhatsApp: true,
-      whatsappLink: "https://wa.me/+923426015759", // Replace with your WhatsApp number
+      whatsappLink: "https://chat.whatsapp.com/KbbpZsCThxaGKxwf5WhbUy",
     },
     {
       name: "PayPal",
@@ -40,9 +48,40 @@ const WithdrawPage = () => {
       img: "/img/payout/bank-payout.png",
     },
   ];
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
 
+  const sections = ["Dashboard", "Videos", "Task", "Referrals"];
+
+  // Fetch user balance from Firestore
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          setLoading(true);
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const data = userDocSnap.data();
+            setBalance(data.balance || 0);
+          } else {
+            setError("User data not found");
+          }
+        } catch (error) {
+          console.error("Error fetching balance:", error);
+          setError("Failed to load balance. Please try again.");
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setError("User not authenticated");
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -51,8 +90,6 @@ const WithdrawPage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const sections = ["Dashboard", "Videos", "Task", "Referrals"];
-
   const scrollToSection = (id: string) => {
     const section = document.getElementById(id.toLowerCase());
     if (section) {
@@ -60,6 +97,34 @@ const WithdrawPage = () => {
       setMenuOpen(false);
     }
   };
+
+  const refreshBalance = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const user = auth.currentUser;
+      if (!user) {
+        setError("User not authenticated");
+        return;
+      }
+
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const data = userDocSnap.data();
+        setBalance(data.balance || 0);
+      } else {
+        setError("User data not found");
+      }
+    } catch (error) {
+      console.error("Error refreshing balance:", error);
+      setError("Failed to refresh balance");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       <header
@@ -68,7 +133,6 @@ const WithdrawPage = () => {
         }`}
       >
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
-          {/* Logo */}
           <Link href="/" className="flex items-center group">
             <Play
               className={`text-primary transition-all duration-300 ${
@@ -84,14 +148,12 @@ const WithdrawPage = () => {
             </span>
           </Link>
 
-          {/* Desktop Navigation with Larger Text */}
           <nav className="hidden lg:flex flex-1 justify-center gap-10">
             {sections.map((text) => (
               <Link
                 href={"/dashboard"}
                 key={text}
                 onClick={() => scrollToSection(text)}
-                // href={`/${text.toLowerCase()}`}
                 className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
               >
                 <span className="block text-lg font-semibold group-hover:scale-110 group-hover:text-primary transition-transform duration-300 origin-center">
@@ -102,7 +164,6 @@ const WithdrawPage = () => {
             ))}
           </nav>
 
-          {/* Buttons */}
           <div className="hidden lg:flex items-center gap-4">
             <Link href="/login">
               <Button variant="ghost" size="icon" className="ml-2">
@@ -113,7 +174,6 @@ const WithdrawPage = () => {
             <ThemeToggle />
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="lg:hidden text-gray-700 dark:text-white hover:scale-110 transition-transform duration-300"
@@ -127,7 +187,6 @@ const WithdrawPage = () => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         <div
           className={`lg:hidden bg-white dark:bg-black overflow-hidden transition-all duration-300 ease-in-out ${
             menuOpen
@@ -163,15 +222,30 @@ const WithdrawPage = () => {
           </div>
         </div>
       </header>
+
       <div className="min-h-screen bg-white px-4 py-8 sm:px-6 lg:px-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-800 mb-4">
             Payment Center
           </h1>
-          <p className="text-xl font-semibold text-green-600 mb-8">
-            $5.59{" "}
-            <span className="text-gray-500 text-base">Account Balance</span>
-          </p>
+          {error ? (
+            <div className="text-red-500 mb-4">{error}</div>
+          ) : loading ? (
+            <div className="animate-pulse h-8 w-32 bg-gray-200 rounded mx-auto mb-8"></div>
+          ) : (
+            <div className="mb-8">
+              <p className="text-xl font-semibold text-green-600">
+                ${(balance + 30).toFixed(2)}{" "}
+                <span className="text-gray-500 text-base">Account Balance</span>
+              </p>
+              <button
+                onClick={refreshBalance}
+                className="mt-2 text-sm text-blue-500 hover:text-blue-700 hover:underline"
+              >
+                Refresh Balance
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -200,8 +274,11 @@ const WithdrawPage = () => {
                   Join on WhatsApp
                 </Link>
               ) : (
-                <button className="bg-white border border-green-500 text-green-500 px-4 py-2 rounded-md hover:bg-green-500 hover:text-white transition">
-                  Coming Soon...
+                <button
+                  className="bg-white border border-green-500 text-green-500 px-4 py-2 rounded-md hover:bg-green-500 hover:text-white transition"
+                  disabled={balance < 5.0}
+                >
+                  {balance < 5.0 ? "Minimum $5.00 required" : "Coming Soon..."}
                 </button>
               )}
             </div>
