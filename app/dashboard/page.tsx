@@ -63,7 +63,7 @@ export default function DashboardPage() {
 
   const [videos, setVideos] = useState<Video[]>([]);
 
-  const sections = ["Dashboard", "Withdraw", "Task", "Referrals"];
+  const sections = ["Dashboard", "Withdraw", "Task", "Referral"];
 
   // Sample video data
   const sampleVideos: Video[] = [
@@ -316,7 +316,7 @@ export default function DashboardPage() {
           <nav className="hidden lg:flex flex-1 justify-center gap-10">
             {sections.map((text) =>
               text.toLowerCase() === "withdraw" ||
-              text.toLowerCase() === "profile" ? (
+              text.toLowerCase() === "referral" ? (
                 // For Withdraw and Profile - link to separate pages
                 <Link
                   href={`/${text.toLowerCase()}`}
@@ -372,6 +372,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Mobile Navigation */}
+
         <div
           className={`lg:hidden bg-white dark:bg-black overflow-hidden transition-all duration-300 ease-in-out ${
             menuOpen
@@ -384,17 +385,15 @@ export default function DashboardPage() {
               <Link
                 key={text}
                 href={
-                  text.toLowerCase() === "dashboard" ||
-                  text.toLowerCase() === "referral"
+                  text.toLowerCase() === "dashboard"
                     ? "/dashboard"
+                    : text.toLowerCase() === "referral"
+                    ? "/referral" // Changed this line to go to referral page
                     : `/${text.toLowerCase()}`
                 }
                 className="py-3 px-3 text-lg font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105 transition-all duration-200 origin-left"
                 onClick={(e) => {
-                  if (
-                    text.toLowerCase() === "dashboard" ||
-                    text.toLowerCase() === "referral"
-                  ) {
+                  if (text.toLowerCase() === "dashboard") {
                     e.preventDefault();
                     scrollToSection(text);
                   }
@@ -524,6 +523,29 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </section>
+            {/* Withdraw Section */}
+            <section id="referrals" className="space-y-6">
+              <h2 className="text-2xl font-bold">Withdraw</h2>
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                <div className="flex flex-col md:flex-row items-center justify-between">
+                  <div className="mb-4 md:mb-0">
+                    <h3 className="text-lg font-medium">
+                      Video dekhne ke baad withdraw lene ke liye aap hum se
+                      WhatsApp par raabta karein.
+                    </h3>
+                    <p className="text-muted-foreground mt-1">
+                      Please click the withdraw Button
+                    </p>
+                  </div>
+                  <Link
+                    href={"https://chat.whatsapp.com/KbbpZsCThxaGKxwf5WhbUy"}
+                  >
+                    {" "}
+                    <Button variant="default">Withdraw</Button>
+                  </Link>
+                </div>
               </div>
             </section>
 
