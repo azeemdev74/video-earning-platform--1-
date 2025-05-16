@@ -20,7 +20,7 @@ const Referrals = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [loading, setLoading] = useState(true);
-  const sections = ["Dashboard", "Videos", "Task", "Referrals"];
+  const sections = ["Dashboard", "Withdraw", "Task", "Referrals"];
 
   useEffect(() => {
     const handleScroll = () => {

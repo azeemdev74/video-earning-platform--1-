@@ -49,7 +49,7 @@ const WithdrawPage = () => {
     },
   ];
 
-  const sections = ["Dashboard", "Videos", "Task", "Referrals"];
+  const sections = ["Dashboard", "Withdraw", "Task", "Referrals"];
 
   // Fetch user balance from Firestore
   useEffect(() => {
@@ -235,7 +235,7 @@ const WithdrawPage = () => {
           ) : (
             <div className="mb-8">
               <p className="text-xl font-semibold text-green-600">
-                ${(balance + 30).toFixed(2)}{" "}
+                ${balance.toFixed(2)}{" "}
                 <span className="text-gray-500 text-base">Account Balance</span>
               </p>
               <button

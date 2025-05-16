@@ -312,26 +312,14 @@ export default function DashboardPage() {
             </span>
           </Link>
 
-          {/* <nav className="hidden lg:flex flex-1 justify-center gap-10">
-            {sections.map((text) => (
-              <Link
-                href={"/dashboard"}
-                key={text}
-                onClick={() => scrollToSection(text)}
-                className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
-              >
-                <span className="block text-lg font-semibold group-hover:scale-110 group-hover:text-primary transition-transform duration-300 origin-center">
-                  {text}
-                </span>
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-              </Link>
-            ))}
-          </nav> */}
+          {/* Desktop Navigation */}
           <nav className="hidden lg:flex flex-1 justify-center gap-10">
             {sections.map((text) =>
-              text.toLowerCase() === "withdraw" ? (
+              text.toLowerCase() === "withdraw" ||
+              text.toLowerCase() === "profile" ? (
+                // For Withdraw and Profile - link to separate pages
                 <Link
-                  href="/withdraw" // This should match your withdraw page route
+                  href={`/${text.toLowerCase()}`}
                   key={text}
                   className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
                 >
@@ -341,10 +329,14 @@ export default function DashboardPage() {
                   <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
                 </Link>
               ) : (
+                // For Dashboard and Referral - scroll to section
                 <Link
                   href="/dashboard"
                   key={text}
-                  onClick={() => scrollToSection(text)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection(text);
+                  }}
                   className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
                 >
                   <span className="block text-lg font-semibold group-hover:scale-110 group-hover:text-primary transition-transform duration-300 origin-center">
@@ -379,6 +371,7 @@ export default function DashboardPage() {
           </button>
         </div>
 
+        {/* Mobile Navigation */}
         <div
           className={`lg:hidden bg-white dark:bg-black overflow-hidden transition-all duration-300 ease-in-out ${
             menuOpen
@@ -388,14 +381,28 @@ export default function DashboardPage() {
         >
           <div className="px-4 py-3 flex flex-col space-y-4">
             {sections.map((text) => (
-              <a
+              <Link
                 key={text}
-                href={`/${text.toLowerCase()}`}
+                href={
+                  text.toLowerCase() === "dashboard" ||
+                  text.toLowerCase() === "referral"
+                    ? "/dashboard"
+                    : `/${text.toLowerCase()}`
+                }
                 className="py-3 px-3 text-lg font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105 transition-all duration-200 origin-left"
-                onClick={() => setMenuOpen(false)}
+                onClick={(e) => {
+                  if (
+                    text.toLowerCase() === "dashboard" ||
+                    text.toLowerCase() === "referral"
+                  ) {
+                    e.preventDefault();
+                    scrollToSection(text);
+                  }
+                  setMenuOpen(false);
+                }}
               >
                 {text}
-              </a>
+              </Link>
             ))}
             <div className="pt-3 flex gap-4">
               <Link
@@ -408,7 +415,6 @@ export default function DashboardPage() {
                   <span className="sr-only">Logout</span>
                 </Button>
               </Link>
-
               <ThemeToggle />
             </div>
           </div>
@@ -534,7 +540,10 @@ export default function DashboardPage() {
                       Share your referral link and start earning more
                     </p>
                   </div>
-                  <Button variant="default">Copy Referral Link</Button>
+                  <Link href={"/referral"}>
+                    {" "}
+                    <Button variant="default">Copy Referral Link</Button>
+                  </Link>
                 </div>
               </div>
             </section>
