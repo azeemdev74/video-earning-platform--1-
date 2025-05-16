@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, firestore } from "@/app/utils/firebaseConfig";
-
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, increment } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +20,15 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [refId, setRefId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const refParam = searchParams.get("ref");
+    if (refParam) {
+      setRefId(refParam);
+    }
+  }, [searchParams]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,13 +47,30 @@ export default function RegisterPage() {
       );
       const user = userCredential.user;
 
-      // Store user details in Firestore
+      // Create user document with $30 balance
       await setDoc(doc(firestore, "users", user.uid), {
         email: user.email,
         createdAt: new Date().toISOString(),
         uid: user.uid,
-        // Add any other details you want to save here
+        balance: 30,
+        referralCount: 0,
+        referralEarnings: 0,
+        referredBy: refId || null,
       });
+
+      // Handle referral if refId is present
+      if (refId) {
+        const referrerDocRef = doc(firestore, "users", refId);
+        const referrerSnap = await getDoc(referrerDocRef);
+
+        if (referrerSnap.exists()) {
+          await updateDoc(referrerDocRef, {
+            balance: increment(5),
+            referralCount: increment(1),
+            referralEarnings: increment(5),
+          });
+        }
+      }
 
       router.push("/dashboard");
     } catch (err: any) {

@@ -285,6 +285,7 @@ const WithdrawPage = () => {
           ))}
         </div>
       </div>
+
       <Footer />
     </div>
   );
