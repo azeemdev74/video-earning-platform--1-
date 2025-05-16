@@ -1,22 +1,76 @@
 "use client";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { app, auth, db } from "@/app/utils/firebaseConfig";
 import { useState, useEffect } from "react";
-
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { LogOut, Menu, Play, X } from "lucide-react";
-
+import {
+  Play,
+  DollarSign,
+  Clock,
+  Gift,
+  LogOut,
+  User,
+  Settings,
+  CreditCard,
+  ChevronRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import Footer from "@/components/footer";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { useSplash } from "@/components/splash-provider";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Menu, X } from "lucide-react";
 
-export default function EditProfilePage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+export default function DashboardPage() {
+  const [balance, setBalance] = useState(0);
+  const [videosWatched, setVideosWatched] = useState(0);
+  const [dailyGoal, setDailyGoal] = useState(0);
+  const [referralEarnings, setReferralEarnings] = useState(0);
+  const [referralCount, setReferralCount] = useState(0);
+  const { setIsLoading } = useSplash();
+
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [timer, setTimer] = useState(35);
+  const [canContinue, setCanContinue] = useState(false);
+  const [currentVideo, setCurrentVideo] = useState<string | null>(null);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
+  const sections = ["Dashboard", "Videos", "Task", "Referrals"];
+
+  // Recommended videos data
+  const recommendedVideos = [
+    { id: "dQw4w9WgXcQ", title: "Learn Fast", duration: "3:15", earnings: 3 },
+    {
+      id: "9bZkp7q19f0",
+      title: "Motivation 101",
+      duration: "4:30",
+      earnings: 3,
+    },
+    {
+      id: "3JZ_D3ELwOQ",
+      title: "Success Hacks",
+      duration: "2:45",
+      earnings: 3,
+    },
+  ];
+
+  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -25,7 +79,104 @@ export default function EditProfilePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const sections = ["Dashboard", "Videos", "Task", "Referrals"];
+  // Initial loading effect
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [setIsLoading]);
+
+  // Fetch user data from Firestore with auth state listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          setIsLoading(true);
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const data = userDocSnap.data();
+            // Set all user data from Firestore
+            setBalance(data.balance || 0);
+            setVideosWatched(data.videosWatched || 0);
+            setDailyGoal(data.dailyGoal || 0);
+            setReferralEarnings(data.referralEarnings || 0);
+
+            // Fetch referral count if referral code exists
+            if (data.referralCode) {
+              const referralsQuery = query(
+                collection(db, "users"),
+                where("referredBy", "==", data.referralCode)
+              );
+              const querySnapshot = await getDocs(referralsQuery);
+              setReferralCount(querySnapshot.size);
+            }
+          } else {
+            // Initialize new user document with $30 registration bonus
+            const initialBalance = 30.0;
+            const referralCode = generateReferralCode(user.uid);
+
+            await setDoc(userDocRef, {
+              balance: initialBalance,
+              videosWatched: 0,
+              dailyGoal: 0,
+              videoHistory: [],
+              dailyWatchHistory: {},
+              createdAt: new Date().toISOString(),
+              lastActiveDate: new Date().toISOString().slice(0, 10),
+              hasReceivedSignupBonus: true,
+              referralCode: referralCode,
+              referralEarnings: 0,
+              referredBy: null,
+            });
+            // Set initial state values
+            setBalance(initialBalance);
+            setVideosWatched(0);
+            setDailyGoal(0);
+            setReferralEarnings(0);
+            setReferralCount(0);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    });
+
+    // Set up persistence
+    auth.setPersistence("local").catch((error) => {
+      console.error("Error setting auth persistence:", error);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Helper function to generate referral code
+  const generateReferralCode = (uid: string) => {
+    return uid.slice(0, 8).toUpperCase();
+  };
+
+  // Video timer effect
+  useEffect(() => {
+    if (!showVideoModal || timer <= 0) return;
+
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setCanContinue(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [showVideoModal, timer]);
 
   const scrollToSection = (id: string) => {
     const section = document.getElementById(id.toLowerCase());
@@ -35,31 +186,58 @@ export default function EditProfilePage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const startVideo = (videoId: string) => {
+    setCurrentVideo(videoId);
+    setTimer(35);
+    setCanContinue(false);
+    setShowVideoModal(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle API call or logic here
-    console.log("Updated Profile:", formData);
-  };
-  const [secretKey] = useState("YTc3OWY1OTY1YjFiNTU5ZTg1ZDZiNWM5YmEwYjQw");
+  const handleContinue = async () => {
+    if (!auth.currentUser || !currentVideo) return;
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(secretKey);
-    alert("Secret key copied to clipboard!");
+    try {
+      const userDocRef = doc(db, "users", auth.currentUser.uid);
+      const today = new Date().toISOString().slice(0, 10);
+
+      // Calculate new values - earning $3 per video
+      const newBalance = Number((balance + 3).toFixed(2));
+      const newVideosWatched = videosWatched + 1;
+      const newDailyGoal = Math.min(dailyGoal + 20, 100);
+
+      // Update Firestore
+      await updateDoc(userDocRef, {
+        balance: newBalance,
+        videosWatched: newVideosWatched,
+        dailyGoal: newDailyGoal,
+        videoHistory: arrayUnion({
+          videoId: currentVideo,
+          watchedAt: new Date().toISOString(),
+          earned: 3,
+        }),
+        [`dailyWatchHistory.${today}`]: newVideosWatched,
+        lastActiveDate: today,
+      });
+
+      // Update local state
+      setBalance(newBalance);
+      setVideosWatched(newVideosWatched);
+      setDailyGoal(newDailyGoal);
+      setShowVideoModal(false);
+      setCurrentVideo(null);
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    }
   };
 
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <header
         className={`sticky top-0 z-50 w-full bg-white dark:bg-black border-b dark:border-gray-800 transition-all duration-300 ${
           scrolled ? "h-16 shadow-lg dark:shadow-gray-800/50" : "h-20 shadow-sm"
         }`}
       >
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
-          {/* Logo */}
           <Link href="/" className="flex items-center group">
             <Play
               className={`text-primary transition-all duration-300 ${
@@ -75,25 +253,34 @@ export default function EditProfilePage() {
             </span>
           </Link>
 
-          {/* Desktop Navigation with Larger Text */}
           <nav className="hidden lg:flex flex-1 justify-center gap-10">
-            {sections.map((text) => (
-              <Link
-                href={"/dashboard"}
-                key={text}
-                onClick={() => scrollToSection(text)}
-                // href={`/${text.toLowerCase()}`}
-                className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
-              >
-                <span className="block text-lg font-semibold group-hover:scale-110 group-hover:text-primary transition-transform duration-300 origin-center">
-                  {text}
-                </span>
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-              </Link>
-            ))}
+            {sections.map((text) =>
+              text === "Referrals" ? (
+                <Link
+                  key={text}
+                  href="/referral"
+                  className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
+                >
+                  <span className="block text-lg font-semibold group-hover:scale-110 group-hover:text-primary transition-transform duration-300 origin-center">
+                    {text}
+                  </span>
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                </Link>
+              ) : (
+                <a
+                  key={text}
+                  onClick={() => scrollToSection(text)}
+                  className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
+                >
+                  <span className="block text-lg font-semibold group-hover:scale-110 group-hover:text-primary transition-transform duration-300 origin-center">
+                    {text}
+                  </span>
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                </a>
+              )
+            )}
           </nav>
 
-          {/* Buttons */}
           <div className="hidden lg:flex items-center gap-4">
             <Link href="/login">
               <Button variant="ghost" size="icon" className="ml-2">
@@ -104,7 +291,6 @@ export default function EditProfilePage() {
             <ThemeToggle />
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="lg:hidden text-gray-700 dark:text-white hover:scale-110 transition-transform duration-300"
@@ -118,7 +304,6 @@ export default function EditProfilePage() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         <div
           className={`lg:hidden bg-white dark:bg-black overflow-hidden transition-all duration-300 ease-in-out ${
             menuOpen
@@ -148,91 +333,175 @@ export default function EditProfilePage() {
                   <span className="sr-only">Logout</span>
                 </Button>
               </Link>
-
               <ThemeToggle />
             </div>
           </div>
         </div>
       </header>
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 sm:p-10">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">
-            Account Settings
-          </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Name:
-              </label>
-              <input
-                type="text"
-                readOnly
-                value="azeem"
-                className="w-full px-4 py-2 rounded-md bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-white"
-              />
+      <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8">
+        <div id="dashboard" className="mb-8">
+          <h1 className="text-2xl font-bold">Welcome back!</h1>
+          <p className="text-muted-foreground">
+            Here's an overview of your account
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="rounded-lg border bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <DollarSign className="h-5 w-5 text-primary" />
+              <h3 className="font-medium">Current Balance</h3>
             </div>
+            <p className="text-2xl font-bold">${(balance + 30).toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              ${balance >= 30 ? (balance - 30).toFixed(2) : "0.00"} earned +
+              $30.00 bonus
+            </p>
+          </div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email:
-              </label>
-              <input
-                type="email"
-                readOnly
-                value="azeemrauf@gmail.com"
-                className="w-full px-4 py-2 rounded-md bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-white"
-              />
+          <div className="rounded-lg border bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <Play className="h-5 w-5 text-primary" />
+              <h3 className="font-medium">Videos Watched</h3>
             </div>
+            <p className="text-2xl font-bold">{videosWatched}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              ${(videosWatched * 3).toFixed(2)} earned from videos
+            </p>
+          </div>
 
-            {/* User ID */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                User ID:
-              </label>
-              <input
-                type="text"
-                readOnly
-                value="16197016"
-                className="w-full px-4 py-2 rounded-md bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-white"
-              />
+          <div className="rounded-lg border bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <Clock className="h-5 w-5 text-primary" />
+              <h3 className="font-medium">Daily Goal</h3>
             </div>
-
-            {/* Secret Key */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Secret Key:
-              </label>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                You will need this secret key in order to retrieve your data or
-                reset your password. Copy and save it in a secure place.
+            <div className="space-y-2">
+              <Progress value={dailyGoal} className="h-2" />
+              <p className="text-xs text-muted-foreground">
+                {dailyGoal}% complete - Watch more videos to reach your goal
               </p>
-              <textarea
-                readOnly
-                value={secretKey}
-                className="w-full px-4 py-2 rounded-md bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-white resize-none"
-                rows={2}
-              />
-              <Button
-                type="button"
-                onClick={copyToClipboard}
-                className="mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
-              >
-                COPY SECRET KEY
-              </Button>
             </div>
           </div>
 
-          {/* Delete Button */}
-          <div className="mt-10 flex justify-end">
-            <Button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">
-              Delete Account
-            </Button>
+          <div className="rounded-lg border bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <Gift className="h-5 w-5 text-primary" />
+              <h3 className="font-medium">Referral Bonus</h3>
+            </div>
+            <p className="text-2xl font-bold">${referralEarnings.toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {referralCount} successful referrals
+            </p>
           </div>
         </div>
-      </div>
+
+        <section id="videos">
+          <div className="grid gap-6 md:grid-cols-3 mb-8">
+            <div className="md:col-span-2 rounded-lg border bg-card p-6 shadow-sm">
+              <h2 className="text-xl font-bold mb-4">Recommended Videos</h2>
+              <div className="space-y-4">
+                {recommendedVideos.map((video) => (
+                  <div
+                    key={video.id}
+                    className="flex flex-col sm:flex-row items-center gap-4 p-3 rounded-lg border hover:bg-muted cursor-pointer"
+                  >
+                    <div className="relative w-full sm:w-32 h-20 rounded overflow-hidden flex-shrink-0">
+                      <img
+                        src={`https://img.youtube.com/vi/${video.id}/0.jpg`}
+                        alt={`${video.title} thumbnail`}
+                        className="object-cover w-full h-full"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-8 w-8 rounded-full bg-black/60 flex items-center justify-center">
+                          <Play className="h-4 w-4 text-white" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex-1 w-full">
+                      <h3 className="font-medium">{video.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Duration: {video.duration} • Earn: ${video.earnings}
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => startVideo(video.id)}
+                    >
+                      Watch
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-center">
+                <Button variant="link">View All Videos</Button>
+              </div>
+            </div>
+
+            <div className="rounded-lg border bg-card p-6 shadow-sm">
+              <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
+              <div className="space-y-2">
+                <Link
+                  href="/withdraw"
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
+                >
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                    <span>Withdraw Earnings</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/edit-profile"
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
+                >
+                  <div className="flex items-center gap-3">
+                    <User className="h-5 w-5 text-primary" />
+                    <span>Edit Profile</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/account-settings"
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted"
+                >
+                  <div className="flex items-center gap-3">
+                    <Settings className="h-5 w-5 text-primary" />
+                    <span>Account Settings</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Dialog open={showVideoModal} onOpenChange={setShowVideoModal}>
+        <DialogContent className="max-w-2xl w-full">
+          <div className="relative aspect-video mb-4">
+            {currentVideo && (
+              <iframe
+                className="w-full h-full rounded"
+                src={`https://www.youtube.com/embed/${currentVideo}?autoplay=1&controls=1`}
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+              />
+            )}
+          </div>
+          {!canContinue ? (
+            <p className="text-center text-sm text-muted-foreground">
+              Please watch for {timer} seconds...
+            </p>
+          ) : (
+            <div className="text-center">
+              <Button onClick={handleContinue}>Continue & Earn $3</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );

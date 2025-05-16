@@ -91,7 +91,7 @@ const Referrals = () => {
         }`}
       >
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
-          <Link href="/" className="flex items-center group">
+          <Link href="/dashboard" className="flex items-center group">
             <Play
               className={`text-primary transition-all duration-300 ${
                 scrolled ? "h-5 w-5" : "h-6 w-6"

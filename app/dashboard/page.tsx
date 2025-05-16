@@ -26,6 +26,8 @@ import {
   Settings,
   CreditCard,
   ChevronRight,
+  X,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -33,7 +35,13 @@ import Footer from "@/components/footer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useSplash } from "@/components/splash-provider";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Menu, X } from "lucide-react";
+
+interface Video {
+  id: string;
+  title: string;
+  thumbnail: string;
+  duration: string;
+}
 
 export default function DashboardPage() {
   const [balance, setBalance] = useState(0);
@@ -42,18 +50,53 @@ export default function DashboardPage() {
   const [referralEarnings, setReferralEarnings] = useState(0);
   const [referralCount, setReferralCount] = useState(0);
   const { setIsLoading } = useSplash();
+  const [showSignupBonus, setShowSignupBonus] = useState(false);
 
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [timer, setTimer] = useState(35);
   const [canContinue, setCanContinue] = useState(false);
   const [currentVideo, setCurrentVideo] = useState<string | null>(null);
+  const [loadingUserData, setLoadingUserData] = useState(true);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const sections = ["Dashboard", "Videos", "Task", "Referrals"];
+  const [videos, setVideos] = useState<Video[]>([]);
 
-  // Handle scroll effect
+  const sections = ["Dashboard", "Withdraw", "Task", "Referrals"];
+
+  // Sample video data
+  const sampleVideos: Video[] = [
+    {
+      id: "dQw4w9WgXcQ",
+      title: "Amazing Product Review",
+      thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+      duration: "3:45",
+    },
+    {
+      id: "9bZkp7q19f0",
+      title: "Tech Gadgets Unboxing",
+      thumbnail: "https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg",
+      duration: "4:20",
+    },
+    {
+      id: "JGwWNGJdvx8",
+      title: "Latest Fashion Trends",
+      thumbnail: "https://img.youtube.com/vi/JGwWNGJdvx8/mqdefault.jpg",
+      duration: "2:55",
+    },
+    {
+      id: "kJQP7kiw5Fk",
+      title: "Travel Destination Guide",
+      thumbnail: "https://img.youtube.com/vi/kJQP7kiw5Fk/mqdefault.jpg",
+      duration: "5:10",
+    },
+  ];
+
+  useEffect(() => {
+    setVideos(sampleVideos);
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -62,7 +105,6 @@ export default function DashboardPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Initial loading effect
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
@@ -71,12 +113,10 @@ export default function DashboardPage() {
     return () => clearTimeout(timer);
   }, [setIsLoading]);
 
-  // Fetch user data from Firestore with auth state listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          setIsLoading(true);
           const userDocRef = doc(db, "users", user.uid);
           const userDocSnap = await getDoc(userDocRef);
 
@@ -87,7 +127,14 @@ export default function DashboardPage() {
             setDailyGoal(data.dailyGoal || 0);
             setReferralEarnings(data.referralEarnings || 0);
 
-            // Fetch referral count
+            if (
+              data.hasReceivedSignupBonus &&
+              !localStorage.getItem("signupBonusShown")
+            ) {
+              setShowSignupBonus(true);
+              localStorage.setItem("signupBonusShown", "true");
+            }
+
             if (data.referralCode) {
               const referralsQuery = query(
                 collection(db, "users"),
@@ -97,8 +144,7 @@ export default function DashboardPage() {
               setReferralCount(querySnapshot.size);
             }
           } else {
-            // Initialize new user document with $30 registration bonus
-            const initialBalance = 30.0;
+            const initialBalance = 30.0; // $30 signup bonus
             const referralCode = generateReferralCode(user.uid);
 
             await setDoc(userDocRef, {
@@ -114,25 +160,28 @@ export default function DashboardPage() {
               referralEarnings: 0,
               referredBy: null,
             });
+
             setBalance(initialBalance);
+            setShowSignupBonus(true);
+            localStorage.setItem("signupBonusShown", "true");
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
         } finally {
-          setIsLoading(false);
+          setLoadingUserData(false);
         }
+      } else {
+        setLoadingUserData(false);
       }
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Helper function to generate referral code
   const generateReferralCode = (uid: string) => {
     return uid.slice(0, 8).toUpperCase();
   };
 
-  // Video timer effect
   useEffect(() => {
     if (!showVideoModal || timer <= 0) return;
 
@@ -171,13 +220,10 @@ export default function DashboardPage() {
     try {
       const userDocRef = doc(db, "users", auth.currentUser.uid);
       const today = new Date().toISOString().slice(0, 10);
-
-      // Calculate new values - earning $3 per video
       const newBalance = Number((balance + 3).toFixed(2));
       const newVideosWatched = videosWatched + 1;
       const newDailyGoal = Math.min(dailyGoal + 20, 100);
 
-      // Update Firestore
       await updateDoc(userDocRef, {
         balance: newBalance,
         videosWatched: newVideosWatched,
@@ -191,7 +237,6 @@ export default function DashboardPage() {
         lastActiveDate: today,
       });
 
-      // Update local state
       setBalance(newBalance);
       setVideosWatched(newVideosWatched);
       setDailyGoal(newDailyGoal);
@@ -204,13 +249,55 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Signup Bonus Notification */}
+      {showSignupBonus && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in">
+            <Gift className="w-5 h-5" />
+            <span>Welcome bonus! $30 has been added to your account</span>
+            <button
+              onClick={() => setShowSignupBonus(false)}
+              className="ml-2 p-1 rounded-full hover:bg-green-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* <header
+        className={`sticky top-0 z-40 w-full bg-white dark:bg-black border-b dark:border-gray-800 transition-all duration-300 ${
+          scrolled ? "h-16 shadow-lg dark:shadow-gray-800/50" : "h-20 shadow-sm"
+        }`}
+      >
+        <div className="container mx-auto px-4 h-full flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              className="md:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+            <Link href="/" className="text-xl font-bold">
+              EarnView
+            </Link>
+          </div>
+          <div className="flex items-center space-x-4">
+            <ThemeToggle />
+            <Button variant="outline" size="sm">
+              <User className="w-4 h-4 mr-2" />
+              Profile
+            </Button>
+          </div>
+        </div>
+      </header> */}
       <header
         className={`sticky top-0 z-50 w-full bg-white dark:bg-black border-b dark:border-gray-800 transition-all duration-300 ${
           scrolled ? "h-16 shadow-lg dark:shadow-gray-800/50" : "h-20 shadow-sm"
         }`}
       >
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
-          <Link href="/" className="flex items-center group">
+          <Link href="/dashboard" className="flex items-center group">
             <Play
               className={`text-primary transition-all duration-300 ${
                 scrolled ? "h-5 w-5" : "h-6 w-6"
@@ -225,12 +312,27 @@ export default function DashboardPage() {
             </span>
           </Link>
 
+          {/* <nav className="hidden lg:flex flex-1 justify-center gap-10">
+            {sections.map((text) => (
+              <Link
+                href={"/dashboard"}
+                key={text}
+                onClick={() => scrollToSection(text)}
+                className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
+              >
+                <span className="block text-lg font-semibold group-hover:scale-110 group-hover:text-primary transition-transform duration-300 origin-center">
+                  {text}
+                </span>
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+              </Link>
+            ))}
+          </nav> */}
           <nav className="hidden lg:flex flex-1 justify-center gap-10">
             {sections.map((text) =>
-              text === "Referrals" ? (
+              text.toLowerCase() === "withdraw" ? (
                 <Link
+                  href="/withdraw" // This should match your withdraw page route
                   key={text}
-                  href="/referral"
                   className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
                 >
                   <span className="block text-lg font-semibold group-hover:scale-110 group-hover:text-primary transition-transform duration-300 origin-center">
@@ -239,7 +341,8 @@ export default function DashboardPage() {
                   <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
                 </Link>
               ) : (
-                <a
+                <Link
+                  href="/dashboard"
                   key={text}
                   onClick={() => scrollToSection(text)}
                   className="relative px-2 py-1 group transition-all duration-300 cursor-pointer"
@@ -248,7 +351,7 @@ export default function DashboardPage() {
                     {text}
                   </span>
                   <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-                </a>
+                </Link>
               )
             )}
           </nav>
@@ -305,6 +408,7 @@ export default function DashboardPage() {
                   <span className="sr-only">Logout</span>
                 </Button>
               </Link>
+
               <ThemeToggle />
             </div>
           </div>
@@ -312,64 +416,165 @@ export default function DashboardPage() {
       </header>
 
       <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8">
-        <div id="dashboard" className="mb-8">
-          <h1 className="text-2xl font-bold">Welcome back, User!</h1>
-          <p className="text-muted-foreground">
-            Here's an overview of your account
+        {loadingUserData ? (
+          <p className="text-center text-muted-foreground">
+            Loading dashboard...
           </p>
-        </div>
+        ) : (
+          <div className="container mx-auto space-y-8">
+            {/* Dashboard Stats */}
+            <section id="dashboard" className="space-y-6">
+              <h2 className="text-2xl font-bold">Dashboard</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <div className="flex items-center space-x-4">
+                    <DollarSign className="w-8 h-8 text-green-500" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Balance</p>
+                      <p className="text-2xl font-bold">
+                        ${balance.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <div className="flex items-center space-x-4">
+                    <Play className="w-8 h-8 text-blue-500" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        Videos Watched
+                      </p>
+                      <p className="text-2xl font-bold">{videosWatched}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <div className="flex items-center space-x-4">
+                    <Clock className="w-8 h-8 text-yellow-500" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        Daily Goal
+                      </p>
+                      <Progress value={dailyGoal} className="h-2 mt-2" />
+                      <p className="text-sm mt-1">{dailyGoal}% complete</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <div className="flex items-center space-x-4">
+                    <Gift className="w-8 h-8 text-purple-500" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Referrals</p>
+                      <p className="text-2xl font-bold">{referralCount}</p>
+                      <p className="text-sm">
+                        Earned: ${referralEarnings.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <div className="rounded-lg border bg-card p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <DollarSign className="h-5 w-5 text-primary" />
-              <h3 className="font-medium">Current Balance</h3>
-            </div>
-            <p className="text-2xl font-bold">${(balance + 30).toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              ${balance >= 30 ? (balance - 30).toFixed(2) : "0.00"} earned +
-              $30.00 bonus
-            </p>
-          </div>
-
-          <div className="rounded-lg border bg-card p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <Play className="h-5 w-5 text-primary" />
-              <h3 className="font-medium">Videos Watched</h3>
-            </div>
-            <p className="text-2xl font-bold">{videosWatched}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              ${(videosWatched * 3).toFixed(2)} earned from videos
-            </p>
-          </div>
-
-          <div className="rounded-lg border bg-card p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <Clock className="h-5 w-5 text-primary" />
-              <h3 className="font-medium">Daily Goal</h3>
-            </div>
-            <div className="space-y-2">
-              <Progress value={dailyGoal} className="h-2" />
-              <p className="text-xs text-muted-foreground">
-                {dailyGoal}% complete - Watch more videos to reach your goal
+            {/* Video Recommendations */}
+            <section id="videos" className="space-y-6">
+              <h2 className="text-2xl font-bold">Available Videos</h2>
+              <p className="text-muted-foreground">
+                Watch these videos to earn money
               </p>
-            </div>
-          </div>
 
-          <div className="rounded-lg border bg-card p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <Gift className="h-5 w-5 text-primary" />
-              <h3 className="font-medium">Referral Bonus</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {videos.map((video) => (
+                  <div
+                    key={video.id}
+                    className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden"
+                  >
+                    <div className="relative">
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="w-full h-40 object-cover"
+                      />
+                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+                        {video.duration}
+                      </div>
+                      <button
+                        onClick={() => startVideo(video.id)}
+                        className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 bg-black bg-opacity-30 transition-opacity"
+                      >
+                        <Play className="w-12 h-12 text-white" />
+                      </button>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-medium line-clamp-2">
+                        {video.title}
+                      </h3>
+                      <Button
+                        onClick={() => startVideo(video.id)}
+                        className="w-full mt-3"
+                        variant="default"
+                      >
+                        Watch & Earn $3
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Referral Section */}
+            <section id="referrals" className="space-y-6">
+              <h2 className="text-2xl font-bold">Refer Friends</h2>
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                <div className="flex flex-col md:flex-row items-center justify-between">
+                  <div className="mb-4 md:mb-0">
+                    <h3 className="text-lg font-medium">
+                      Invite friends and earn 20% of their earnings
+                    </h3>
+                    <p className="text-muted-foreground mt-1">
+                      Share your referral link and start earning more
+                    </p>
+                  </div>
+                  <Button variant="default">Copy Referral Link</Button>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
+      </main>
+
+      {/* Mobile Menu */}
+      {menuOpen && (
+        <div className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden">
+          <div className="bg-white dark:bg-gray-900 h-full w-4/5 max-w-sm p-4">
+            <div className="flex flex-col space-y-4">
+              {sections.map((section) => (
+                <button
+                  key={section}
+                  onClick={() => scrollToSection(section)}
+                  className="py-3 px-4 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-left flex items-center justify-between"
+                >
+                  {section}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              ))}
+              <div className="border-t dark:border-gray-800 pt-4">
+                <button className="w-full py-3 px-4 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-left flex items-center">
+                  <Settings className="w-5 h-5 mr-3" />
+                  Settings
+                </button>
+                <button className="w-full py-3 px-4 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-left flex items-center">
+                  <CreditCard className="w-5 h-5 mr-3" />
+                  Withdraw
+                </button>
+                <button className="w-full py-3 px-4 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-left flex items-center text-red-500">
+                  <LogOut className="w-5 h-5 mr-3" />
+                  Sign Out
+                </button>
+              </div>
             </div>
-            <p className="text-2xl font-bold">${referralEarnings.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {referralCount} successful referrals
-            </p>
           </div>
         </div>
-
-        {/* Rest of your component remains the same */}
-      </main>
+      )}
 
       <Dialog open={showVideoModal} onOpenChange={setShowVideoModal}>
         <DialogContent className="max-w-2xl w-full">
