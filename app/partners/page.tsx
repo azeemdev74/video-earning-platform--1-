@@ -9,7 +9,7 @@ export default function PartnersPage() {
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-16 flex items-center border-b">
         <Link href="/" className="flex items-center justify-center">
-          <span className="text-xl font-bold">Rewards Hub Dollor</span>
+          <span className="text-xl font-bold">Rewards Hub Dollar</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
@@ -67,7 +67,7 @@ export default function PartnersPage() {
                 <h2 className="text-2xl font-bold mb-4">Become a Partner</h2>
                 <p className="mb-6 text-muted-foreground">
                   Are you a content creator or brand looking to reach a wider
-                  audience? Partner with Rewards Hub Dollor to showcase your
+                  audience? Partner with Rewards Hub Dollar to showcase your
                   videos to our engaged user base. Our platform offers:
                 </p>
                 <ul className="space-y-2 mb-6">

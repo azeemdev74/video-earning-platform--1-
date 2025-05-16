@@ -82,7 +82,7 @@ export default function RegisterPage() {
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-16 flex items-center justify-between border-b bg-white shadow-sm">
         <Link href="/" className="text-xl font-bold text-gray-900">
-          Rewards Hub Dollor
+          Rewards Hub Dollar
         </Link>
         <div className="hidden lg:flex items-center space-x-4">
           <ThemeToggle />

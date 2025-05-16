@@ -16,7 +16,7 @@ export default function FeaturesPage() {
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-16 flex items-center border-b">
         <Link href="/" className="flex items-center justify-center">
-          <span className="text-xl font-bold">Rewards Hub Dollor</span>
+          <span className="text-xl font-bold">Rewards Hub Dollar</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link

@@ -8,7 +8,7 @@ export default function AboutPage() {
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-16 flex items-center border-b">
         <Link href="/" className="flex items-center justify-center">
-          <span className="text-xl font-bold">Rewards Hub Dollor</span>
+          <span className="text-xl font-bold">Rewards Hub Dollar</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
@@ -52,7 +52,7 @@ export default function AboutPage() {
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  About Rewards Hub Dollor
+                  About Rewards Hub Dollar
                 </h1>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl">
                   Our mission is to reward users for their time and attention.
@@ -63,7 +63,7 @@ export default function AboutPage() {
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold">Our Story</h2>
                 <p className="text-muted-foreground">
-                  Rewards Hub Dollor was founded in 2023 with a simple idea:
+                  Rewards Hub Dollar was founded in 2023 with a simple idea:
                   what if people could earn money by watching videos they're
                   already interested in? Our founders recognized that people's
                   attention is valuable, and advertisers are willing to pay for

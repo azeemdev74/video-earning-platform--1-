@@ -54,7 +54,7 @@ export default function LoginPage() {
           href="/"
           className="flex items-center text-xl font-bold text-gray-900"
         >
-          Rewards Hub Dollor
+          Rewards Hub Dollar
         </Link>
         <button
           onClick={() => setIsOpen(!isOpen)}

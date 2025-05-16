@@ -11,7 +11,7 @@ export default function Loading() {
           </div>
         </div>
         <h2 className="mt-4 text-xl font-bold text-foreground">
-          Rewards Hub Dollor
+          Rewards Hub Dollar
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
       </div>

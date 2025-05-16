@@ -9,10 +9,10 @@ export default function Footer() {
         <div className="flex flex-col items-center gap-4 md:items-start md:gap-2">
           <Link href="/" className="flex items-center gap-2">
             <Play className="h-5 w-5 text-primary" />
-            <span className="text-lg font-bold">Rewards Hub Dollor</span>
+            <span className="text-lg font-bold">Rewards Hub Dollar</span>
           </Link>
           <p className="text-center text-sm text-muted-foreground md:text-left">
-            &copy; {new Date().getFullYear()} Rewards Hub Dollor. All rights
+            &copy; {new Date().getFullYear()} Rewards Hub Dollar. All rights
             reserved.
           </p>
         </div>
