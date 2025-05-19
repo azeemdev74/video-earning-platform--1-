@@ -67,30 +67,30 @@ export default function DashboardPage() {
 
   // Sample video data
   const sampleVideos: Video[] = [
-    {
-      id: "dQw4w9WgXcQ",
-      title: "Amazing Product Review",
-      thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
-      duration: "3:45",
-    },
-    {
-      id: "9bZkp7q19f0",
-      title: "Tech Gadgets Unboxing",
-      thumbnail: "https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg",
-      duration: "4:20",
-    },
-    {
-      id: "JGwWNGJdvx8",
-      title: "Latest Fashion Trends",
-      thumbnail: "https://img.youtube.com/vi/JGwWNGJdvx8/mqdefault.jpg",
-      duration: "2:55",
-    },
-    {
-      id: "kJQP7kiw5Fk",
-      title: "Travel Destination Guide",
-      thumbnail: "https://img.youtube.com/vi/kJQP7kiw5Fk/mqdefault.jpg",
-      duration: "5:10",
-    },
+    // {
+    //   id: "dQw4w9WgXcQ",
+    //   title: "Amazing Product Review",
+    //   thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+    //   duration: "3:45",
+    // },
+    // {
+    //   id: "9bZkp7q19f0",
+    //   title: "Tech Gadgets Unboxing",
+    //   thumbnail: "https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg",
+    //   duration: "4:20",
+    // },
+    // {
+    //   id: "JGwWNGJdvx8",
+    //   title: "Latest Fashion Trends",
+    //   thumbnail: "https://img.youtube.com/vi/JGwWNGJdvx8/mqdefault.jpg",
+    //   duration: "2:55",
+    // },
+    // {
+    //   id: "kJQP7kiw5Fk",
+    //   title: "Travel Destination Guide",
+    //   thumbnail: "https://img.youtube.com/vi/kJQP7kiw5Fk/mqdefault.jpg",
+    //   duration: "5:10",
+    // },
   ];
 
   useEffect(() => {
