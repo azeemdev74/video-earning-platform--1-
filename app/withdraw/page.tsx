@@ -25,7 +25,7 @@ const WithdrawPage = () => {
         "Join our WhatsApp group to receive payout, updates, get support, and stay informed about the latest payment methods and announcements.",
       img: "/img/payout/whatsapp-payout.png",
       isWhatsApp: true,
-      whatsappLink: "https://chat.whatsapp.com/FuOWNyhsOhM8xvbZ8qTGzm",
+      whatsappLink: "https://chat.whatsapp.com/EBhmdiaB9879OvjQIewBeR",
     },
     {
       name: "PayPal",
