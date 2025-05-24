@@ -388,6 +388,8 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
+        {/* Ads Section */}
+        <div id="container-d4855d4ae6562c2519da098161534391"></div>
         {/* Section 5 Global Offers */}
         <section className=" px-4 py-16">
           <div className="max-w-6xl mx-auto text-center flex flex-col items-center">

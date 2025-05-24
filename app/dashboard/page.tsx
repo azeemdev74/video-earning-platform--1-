@@ -479,6 +479,8 @@ export default function DashboardPage() {
                 </div>
               </div>
             </section>
+            {/* Ads Section */}
+            <div id="container-d4855d4ae6562c2519da098161534391"></div>
 
             {/* Video Recommendations */}
             <section id="videos" className="space-y-6">

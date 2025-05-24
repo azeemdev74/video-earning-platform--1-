@@ -20,6 +20,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          async="async"
+          data-cfasync="false"
+          src="//pl26731117.profitableratecpm.com/d4855d4ae6562c2519da098161534391/invoke.js"
+        ></script>
+      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
