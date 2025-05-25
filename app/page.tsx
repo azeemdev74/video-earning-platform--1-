@@ -399,6 +399,7 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               viewport={{ amount: 0.5 }}
             >
+              <div id="container-d4855d4ae6562c2519da098161534391"></div>
               {/* Heading */}
               <h2 className="text-3xl md:text-4xl font-bold  mb-4">
                 Global Offers
