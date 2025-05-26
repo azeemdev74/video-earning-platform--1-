@@ -36,14 +36,14 @@ export default function RootLayout({
         >
           <SplashProvider>{children}</SplashProvider>
         </ThemeProvider>
-        <script
+        {/* <script
           type="text/javascript"
           src="//pl26742529.profitableratecpm.com/da/0a/48/da0a48caf8dcc9500817f922473c9442.js"
         ></script>
         <script
           type="text/javascript"
           src="//pl26744923.profitableratecpm.com/bc/87/f3/bc87f330f50c2b8861bab256c45189d9.js"
-        ></script>
+        ></script> */}
       </body>
     </html>
   );
